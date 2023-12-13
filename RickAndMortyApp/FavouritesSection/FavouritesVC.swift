@@ -1,19 +1,17 @@
 //
-//  ViewController.swift
+//  FavouritesVC.swift
 //  RickAndMortyApp
 //
 //  Created by Tixon Markin on 12.12.2023.
 //
 
+import Foundation
 import UIKit
 
-class ViewController: UIViewController {
-
+final class FavouritesVC: UIViewController {
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
     }
-
-
 }
-
