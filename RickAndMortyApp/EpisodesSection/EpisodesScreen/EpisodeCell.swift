@@ -8,9 +8,12 @@
 import UIKit
 
 class EpisodeCell: UICollectionViewCell {
+    
     private var mainImageView: UIImageView = {
         let view = UIImageView()
         view.backgroundColor = .red
+        view.layer.cornerRadius = 4
+        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
         return view
