@@ -11,6 +11,18 @@ protocol CharacterInteractorInput {
     
 }
 
+extension CharacterInteractor: ServiceObtainable {
+    var neededServices: [Service] {
+        []
+    }
+    
+    func addServices(_ services: [Service : ServiceProtocol]) {
+        
+    }
+    
+    
+}
+
 final class CharacterInteractor {
     var presenter: CharacterPresenterInput?
     

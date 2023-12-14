@@ -12,9 +12,20 @@ protocol FavouritesCoordinatorInput {
     
 }
 
+extension FavouritesCoordinator: ServiceObtainable {
+    var neededServices: [Service] {
+        [.builder]
+    }
+    
+    func addServices(_ services: [Service : ServiceProtocol]) {
+        builder = (services[.builder] as! ScreenBuilderProtocol)
+    }
+}
+
 final class FavouritesCoordinator: ChildCoordinator {
     var rootController: UINavigationController
     var parent: any ParentCoordinator
+    private var builder: ScreenBuilderProtocol?
     
     init(parent: some ParentCoordinator) {
         self.parent = parent

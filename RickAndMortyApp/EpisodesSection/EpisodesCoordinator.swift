@@ -12,19 +12,31 @@ protocol EpisodesCoordinatorInput {
     func showCharacterModule()
 }
 
+extension EpisodesCoordinator: ServiceObtainable {
+    var neededServices: [Service] {
+        [.builder]
+    }
+    
+    func addServices(_ services: [Service : ServiceProtocol]) {
+        builder = (services[.builder] as! ScreenBuilderProtocol)
+    }
+}
+
 final class EpisodesCoordinator: ChildCoordinator {
     var parent: any ParentCoordinator
     var rootController: UINavigationController
-    let moduleBuilder: ModuleBuilderProtocol
+    private var builder: ScreenBuilderProtocol?
     
     init(parent: any ParentCoordinator) {
         self.parent = parent
         rootController = EpisodesNC()
-        moduleBuilder = ModuleBuilder()
     }
     
     func start() {
-        let episodes = moduleBuilder.buildModule(.episodes)
+        guard let episodes = builder?.buildScreen(.episodes) else {
+            print("EpisodesCoordinator: can not start")
+            return
+        }
         rootController.viewControllers = [episodes]
     }
     
@@ -36,7 +48,10 @@ final class EpisodesCoordinator: ChildCoordinator {
 
 extension EpisodesCoordinator: EpisodesCoordinatorInput {
     func showCharacterModule() {
-        let characterVC = moduleBuilder.buildModule(.characterDetail)
+        guard let characterVC = builder?.buildScreen(.characterDetail) else {
+            print("EpisodesCoordinator: can not showCharacterModule")
+            return
+        }
         rootController.pushViewController(characterVC, animated: true)
     }
 }

@@ -18,10 +18,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let scene = (scene as? UIWindowScene) else { return }
         
+        
+        let serviceInjector = ServiceInjector()
+        let builder = serviceInjector.getBuilder()
+        let mainCoordinator = builder.build(.main) as MainCoordinator
+        
         window = UIWindow(windowScene: scene)
-        let mainCoordinator = MainCoordinator()
         window?.rootViewController = mainCoordinator.rootController
         window?.makeKeyAndVisible()
+        
         mainCoordinator.start()
     }
 
