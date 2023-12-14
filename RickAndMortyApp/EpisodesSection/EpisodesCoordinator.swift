@@ -28,6 +28,10 @@ final class EpisodesCoordinator: ChildCoordinator {
         rootController.viewControllers = [episodes]
     }
     
+    deinit {
+        print("deinit EpisodesCoordinator")
+    }
+    
 }
 
 extension EpisodesCoordinator: EpisodesCoordinatorInput {

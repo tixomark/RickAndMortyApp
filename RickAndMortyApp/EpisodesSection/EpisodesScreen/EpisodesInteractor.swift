@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 protocol EpisodesInteractorInput {
     
@@ -23,3 +24,5 @@ final class EpisodesInteractor {
 extension EpisodesInteractor: EpisodesInteractorInput {
     
 }
+
+

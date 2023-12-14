@@ -26,6 +26,8 @@ final class MainCoordinator: ParentCoordinator {
     func start() {
         let episodesCoordinator = EpisodesCoordinator(parent: self)
         rootController.viewControllers = [episodesCoordinator.rootController]
+        
+        childCoordinators.append(episodesCoordinator)
         episodesCoordinator.start()
     }
     
