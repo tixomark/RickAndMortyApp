@@ -22,7 +22,7 @@ class EpisodeCell: UICollectionViewCell {
     private var nameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "Roboto-Medium", size: 30)
-        label.text = "some text"
+        label.numberOfLines = 0
         return label
     }()
     
@@ -45,7 +45,7 @@ class EpisodeCell: UICollectionViewCell {
     private var episodeLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "Roboto-Medium", size: 16)
-        label.text = "some text"
+        label.numberOfLines = 0
         return label
     }()
     
@@ -60,14 +60,8 @@ class EpisodeCell: UICollectionViewCell {
     override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
         let size = contentView.systemLayoutSizeFitting(layoutAttributes.frame.size,
                                                        withHorizontalFittingPriority: .required,
-                                                       verticalFittingPriority: .defaultLow)
+                                                       verticalFittingPriority: .fittingSizeLevel)
         layoutAttributes.frame.size = size
-//        layoutAttributes.frame.size.width = 300
-//        if layoutAttributes.indexPath.item % 2 == 0 {
-//            var newFrame = layoutAttributes.frame
-//            newFrame.origin.x += 40
-//            layoutAttributes.frame = newFrame
-//        }
         return layoutAttributes
     }
     
@@ -123,6 +117,14 @@ class EpisodeCell: UICollectionViewCell {
             
         ])
         
+    }
+    
+    func configure(using episode: Episode) {
+        mainImageView.image = episode.image
+        nameLabel.text = episode.characterName
+        let episodeText = episode.name + " | " + episode.episode
+        episodeLabel.text = episodeText
+        likeView.setInitialState(episode.isFavourite)
     }
 }
 

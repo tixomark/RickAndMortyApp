@@ -17,7 +17,7 @@ struct Info: Codable {
     var next, prev: String?
 }
 
-struct Episode: Codable {
+struct NetworkEpisode: Codable {
     var id: Int?
     var name, airDate, episode: String?
     var characters: [String]?
@@ -28,7 +28,7 @@ struct Episode: Codable {
         case airDate = "air_date"
     }
 }
-struct Character: Codable {
+struct NetworkCharacter: Codable {
     var id: Int?
     var name, status, species, type, gender: String?
     var origin, location: String?

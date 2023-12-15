@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 protocol EpisodesVCInput: AnyObject {
-    
+    func displayFetchedEpisodes(_ episodes: EpisodesList.FetchEpisodes)
 }
 
 final class EpisodesVC: UIViewController {
@@ -45,12 +45,8 @@ final class EpisodesVC: UIViewController {
     }()
     
     private var cellSize: CGSize!
-    
-    override func loadView() {
-        super.loadView()
-        
-    }
-    
+    private var episodes: [Episode] = []
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -59,6 +55,8 @@ final class EpisodesVC: UIViewController {
         collection.delegate = self
         collection.register(EpisodeCell.self,
                             forCellWithReuseIdentifier: EpisodeCell.description())
+        
+        interactor?.fetchEpisodes(.request)
     }
     
     private var isLayoutCreated = false
@@ -98,34 +96,28 @@ final class EpisodesVC: UIViewController {
 }
 
 extension EpisodesVC: EpisodesVCInput {
+    func displayFetchedEpisodes(_ episodes: EpisodesList.FetchEpisodes) {
+        guard case let .viewModel(episodes) = episodes
+        else { return }
+        
+        self.episodes = episodes
+        Task { @MainActor in
+            collection.reloadData()
+        }
+    }
+    
     
 }
 
 extension EpisodesVC: UICollectionViewDelegateFlowLayout , UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        10
+        episodes.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EpisodeCell.description(), for: indexPath) as! EpisodeCell
+        cell.configure(using: episodes[indexPath.item])
+        
         return cell
-    }
-    
-//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        let size = calculateCellSize()
-//        return size
-//    }
-    
-    private func calculateCellSize() -> CGSize {
-        if cellSize == nil {
-            let cell = EpisodeCell()
-            let neededSize = CGSize(width: collection.bounds.width - 48, 
-                                    height: 1000)
-            let size = cell.contentView.systemLayoutSizeFitting(neededSize,
-                                                                withHorizontalFittingPriority: .required,
-                                                                verticalFittingPriority: .defaultLow)
-            cellSize = size
-        }
-        return cellSize
     }
 }

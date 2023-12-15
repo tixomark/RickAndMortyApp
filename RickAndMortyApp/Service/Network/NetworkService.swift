@@ -6,17 +6,19 @@
 //
 
 import Foundation
+import UIKit
 
 protocol NetworkServiceProtocol {
-    func getCharacterBy(path: String) async -> Character?
-    func getCharacterBy(id: Int) async -> Character?
+    func getCharacterBy(path: String) async -> NetworkCharacter?
+    func getCharacterBy(id: Int) async -> NetworkCharacter?
     func getPage<T: Codable>(pagePath path: String?) async -> Response<T>?
+    func getImage(atPath path: String) async -> UIImage?
 }
 
 final class NetworkService: ServiceProtocol {
     var description: String { "Network service" }
     
-    enum BaseURLs: String {
+    private enum BaseURLs: String {
         case characters = "https://rickandmortyapi.com/api/character"
         case locations = "https://rickandmortyapi.com/api/location"
         case episodes = "https://rickandmortyapi.com/api/episode"
@@ -42,14 +44,14 @@ final class NetworkService: ServiceProtocol {
 }
 
 extension NetworkService: NetworkServiceProtocol {
-    func getCharacterBy(path: String) async -> Character? {
+    func getCharacterBy(path: String) async -> NetworkCharacter? {
         guard var url = URL(string: path) 
         else { return nil }
         let request = URLRequest(url: url)
         return await getUmSomething(using: request)
     }
 
-    func getCharacterBy(id: Int) async -> Character? {
+    func getCharacterBy(id: Int) async -> NetworkCharacter? {
         guard var url = URL(string: BaseURLs.characters.rawValue) 
         else { return nil }
         url = url.appendingPathComponent(String(id))
@@ -57,12 +59,12 @@ extension NetworkService: NetworkServiceProtocol {
         return await getUmSomething(using: request)
     }
 
-    func getPage<T: Codable>(pagePath path: String? = nil) async -> Response<T>? {
+    func getPage<T: Codable>(pagePath path: String?) async -> Response<T>? {
         let urlPath = 
         if path == nil {
             switch T.self {
-            case is Episode.Type: BaseURLs.episodes.rawValue
-            case is Character.Type: BaseURLs.characters.rawValue
+            case is NetworkEpisode.Type: BaseURLs.episodes.rawValue
+            case is NetworkCharacter.Type: BaseURLs.characters.rawValue
             default: ""
             }
         } else {
@@ -74,5 +76,28 @@ extension NetworkService: NetworkServiceProtocol {
         let request = URLRequest(url: url)
         var something: Response<T>? = await getUmSomething(using: request)
         return something
+    }
+    
+    func getImage(atPath path: String) async -> UIImage? {
+        guard let url = URL(string: path)
+        else {
+            print("Bad url")
+            return nil
+        }
+        let request = URLRequest(url: url)
+        var result: UIImage?
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let response = response as? HTTPURLResponse,
+                    response.statusCode / 100 == 2
+            else {
+                print("Bad response(status code is not 2xx)")
+                return result
+            }
+            result = UIImage(data: data)
+        } catch {
+            print(error.localizedDescription)
+        }
+        return result
     }
 }
