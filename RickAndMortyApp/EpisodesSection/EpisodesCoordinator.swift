@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 protocol EpisodesCoordinatorInput {
-    func showCharacterModule()
+    func showCharacterModule(_ character: Character)
 }
 
 extension EpisodesCoordinator: ServiceObtainable {
@@ -47,8 +47,8 @@ final class EpisodesCoordinator: ChildCoordinator {
 }
 
 extension EpisodesCoordinator: EpisodesCoordinatorInput {
-    func showCharacterModule() {
-        guard let characterVC = builder?.buildScreen(.characterDetail) else {
+    func showCharacterModule(_ character: Character) {
+        guard let characterVC = builder?.buildScreen(.characterDetail(character)) else {
             print("EpisodesCoordinator: can not showCharacterModule")
             return
         }

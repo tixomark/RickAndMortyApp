@@ -21,7 +21,8 @@ final class Builder: ServiceProtocol, ServiceDistributor {
     weak var serviceInjector: ServiceInjectorProtocol?
     
     enum EpisodesModuleScreen {
-        case episodes, characterDetail
+        case episodes
+        case characterDetail(_ character: Character)
     }
     enum Coordinator {
         case main
@@ -36,8 +37,8 @@ extension Builder: ScreenBuilderProtocol {
         switch module {
         case .episodes:
             buildEpisodesScreen()
-        case .characterDetail:
-            buildCharacterScreen()
+        case .characterDetail(let character):
+            buildCharacterScreen(character)
         }
     }
     
@@ -51,7 +52,7 @@ extension Builder: ScreenBuilderProtocol {
         serviceInjector?.injectServicesFor(interactor)
         return view
     }
-    private func buildCharacterScreen() -> UIViewController {
+    private func buildCharacterScreen(_ character: Character) -> UIViewController {
         let view = CharacterVC()
         let interactor = CharacterInteractor()
         let presenter = CharacterPresenter()

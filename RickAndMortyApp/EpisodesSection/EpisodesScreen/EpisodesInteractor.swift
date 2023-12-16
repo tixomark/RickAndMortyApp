@@ -36,7 +36,7 @@ final class EpisodesInteractor {
 }
 
 extension EpisodesInteractor: EpisodesInteractorInput {
-    private typealias CharacterData = (UIImage?, String)
+    private typealias CharacterData = (image: UIImage?, character: NetworkCharacter)
     
     func fetchEpisodes(_ request: EpisodesList.FetchEpisodes) {
         Task(priority: .userInitiated) { () -> () in
@@ -44,13 +44,14 @@ extension EpisodesInteractor: EpisodesInteractorInput {
             guard let episodes = result?.results
             else { return }
             
-            let characterData = await fetchRandomCharactersData(fromEpisodes: episodes)
+            let characterData = await self.fetchRandomCharactersData(fromEpisodes: episodes)
+            
             presenter?.presentFetchedEpisodes(.response(episodes: episodes, characters: characterData))
         }
     }
     
-    private func fetchRandomCharactersData(fromEpisodes episodes: [NetworkEpisode]) async -> [CharacterData] {
-        let characters = await withTaskGroup(of: (index: Int, character: CharacterData).self) { group -> [CharacterData] in
+    private func fetchRandomCharactersData(fromEpisodes episodes: [NetworkEpisode]) async -> [CharacterData?] {
+        let characters = await withTaskGroup(of: (index: Int, character: CharacterData?).self) { group -> [CharacterData?] in
             for (index, episode) in episodes.enumerated() {
                 guard let numberOfCharacters = episode.characters?.count,
                         numberOfCharacters != 0
@@ -66,7 +67,7 @@ extension EpisodesInteractor: EpisodesInteractorInput {
                 }
             }
             
-            var groupResult = Array<CharacterData>(repeating: (nil, ""), count: episodes.count)
+            var groupResult = Array<CharacterData?>(repeating: nil, count: episodes.count)
             for await (index, chracter) in group {
                 groupResult[index] = chracter
             }
@@ -76,16 +77,17 @@ extension EpisodesInteractor: EpisodesInteractorInput {
         return characters
     }
     
-    private func fetchCharacterData(from path: String) async -> CharacterData {
-        let character = await self.networkService?.getCharacterBy(path: path)
-        guard let imagePath = character?.image,
-              let characterName = character?.name
+    private func fetchCharacterData(from path: String) async -> CharacterData? {
+        guard let character = await self.networkService?.getCharacterBy(path: path)
+        else { return nil }
+        
+        guard let imagePath = character.image
         else {
-            return (nil, character?.name ?? "")
+            return (nil, character)
         }
         
         let image = await self.networkService?.getImage(atPath: imagePath)
-        return (image, characterName)
+        return (image, character)
     }
 }
 

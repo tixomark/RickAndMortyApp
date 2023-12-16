@@ -12,21 +12,16 @@ class Episode {
     var id: Int
     var name: String
     var episode: String
-    var characterName: String?
-    var image: UIImage?
     var isFavourite: Bool
+    var character: Character?
     
     private init(id: Int, 
                  name: String,
                  episode: String,
-                 characterName: String? = nil,
-                 image: UIImage? = nil,
                  isFavourite: Bool = false) {
         self.id = id
         self.name = name
         self.episode = episode
-        self.characterName = characterName
-        self.image = image
         self.isFavourite = isFavourite
     }
     

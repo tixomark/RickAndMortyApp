@@ -45,17 +45,21 @@ final class NetworkService: ServiceProtocol {
 
 extension NetworkService: NetworkServiceProtocol {
     func getCharacterBy(path: String) async -> NetworkCharacter? {
-        guard var url = URL(string: path) 
+        guard let url = URL(string: path) 
         else { return nil }
+        
         let request = URLRequest(url: url)
+        
         return await getUmSomething(using: request)
     }
 
     func getCharacterBy(id: Int) async -> NetworkCharacter? {
         guard var url = URL(string: BaseURLs.characters.rawValue) 
         else { return nil }
+        
         url = url.appendingPathComponent(String(id))
         let request = URLRequest(url: url)
+        
         return await getUmSomething(using: request)
     }
 
@@ -70,12 +74,14 @@ extension NetworkService: NetworkServiceProtocol {
         } else {
             path
         }
+        
         guard let urlPath,
                 let url = URL(string: urlPath)
         else { return nil }
+        
         let request = URLRequest(url: url)
-        var something: Response<T>? = await getUmSomething(using: request)
-        return something
+        
+        return await getUmSomething(using: request)
     }
     
     func getImage(atPath path: String) async -> UIImage? {

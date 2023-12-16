@@ -120,8 +120,8 @@ class EpisodeCell: UICollectionViewCell {
     }
     
     func configure(using episode: Episode) {
-        mainImageView.image = episode.image
-        nameLabel.text = episode.characterName
+        mainImageView.image = episode.character?.image
+        nameLabel.text = episode.character?.name
         let episodeText = episode.name + " | " + episode.episode
         episodeLabel.text = episodeText
         likeView.setInitialState(episode.isFavourite)
