@@ -8,7 +8,7 @@
 import Foundation
 
 protocol EpisodesPresenterInput {
-    func presentFetchedEpisodes(_ episodes: EpisodesList.FetchEpisodes)
+    func presentFetchedEpisodes(_ responce: FetchEpisodes.Response)
 }
 
 final class EpisodesPresenter {
@@ -20,18 +20,16 @@ final class EpisodesPresenter {
 }
 
 extension EpisodesPresenter: EpisodesPresenterInput {
-    func presentFetchedEpisodes(_ episodes: EpisodesList.FetchEpisodes) {
-        guard case let .response(netEpisodes, characterSData) = episodes
-        else { return }
-        
+    func presentFetchedEpisodes(_ responce: FetchEpisodes.Response) {
         var episodes = [Episode]()
-        for (index, netEpisode) in netEpisodes.enumerated() {
+        
+        for (index, netEpisode) in responce.episodes.enumerated() {
             guard let episode = Episode(from: netEpisode)
             else { continue }
             
             episodes.append(episode)
             
-            guard let characterData = characterSData[index]
+            guard let characterData = responce.characters[index]
             else { continue }
             
             let character = Character(from: characterData.character)
@@ -39,7 +37,8 @@ extension EpisodesPresenter: EpisodesPresenterInput {
             episode.character = character
         }
         
-        view?.displayFetchedEpisodes(.viewModel(episodes: episodes))
+        let viewModel = FetchEpisodes.ViewModel(episodes: episodes)
+        view?.displayFetchedEpisodes(viewModel)
     }
     
     

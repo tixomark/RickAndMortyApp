@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 protocol EpisodesInteractorInput {
-    func fetchEpisodes(_ request: EpisodesList.FetchEpisodes)
+    func fetchEpisodes(_ request: FetchEpisodes.Request)
 }
 
 extension EpisodesInteractor: ServiceObtainable {
@@ -38,7 +38,7 @@ final class EpisodesInteractor {
 extension EpisodesInteractor: EpisodesInteractorInput {
     private typealias CharacterData = (image: UIImage?, character: NetworkCharacter)
     
-    func fetchEpisodes(_ request: EpisodesList.FetchEpisodes) {
+    func fetchEpisodes(_ request: FetchEpisodes.Request) {
         Task(priority: .userInitiated) { () -> () in
             let result: Response<NetworkEpisode>? = await networkService?.getPage(pagePath: nil)
             guard let episodes = result?.results
@@ -46,7 +46,9 @@ extension EpisodesInteractor: EpisodesInteractorInput {
             
             let characterData = await self.fetchRandomCharactersData(fromEpisodes: episodes)
             
-            presenter?.presentFetchedEpisodes(.response(episodes: episodes, characters: characterData))
+            let responce = FetchEpisodes.Response(episodes: episodes,
+                                                  characters: characterData)
+            presenter?.presentFetchedEpisodes(responce)
         }
     }
     

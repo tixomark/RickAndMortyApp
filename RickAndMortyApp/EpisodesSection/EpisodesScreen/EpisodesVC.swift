@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 protocol EpisodesVCInput: AnyObject {
-    func displayFetchedEpisodes(_ episodes: EpisodesList.FetchEpisodes)
+    func displayFetchedEpisodes(_ viewModel: FetchEpisodes.ViewModel)
 }
 
 final class EpisodesVC: UIViewController {
@@ -57,7 +57,8 @@ final class EpisodesVC: UIViewController {
         collection.register(EpisodeCell.self,
                             forCellWithReuseIdentifier: EpisodeCell.description())
         
-        interactor?.fetchEpisodes(.request)
+        let request = FetchEpisodes.Request()
+        interactor?.fetchEpisodes(request)
     }
     
     private var isLayoutCreated = false
@@ -98,11 +99,8 @@ final class EpisodesVC: UIViewController {
 }
 
 extension EpisodesVC: EpisodesVCInput {
-    func displayFetchedEpisodes(_ episodes: EpisodesList.FetchEpisodes) {
-        guard case let .viewModel(episodes) = episodes
-        else { return }
-        
-        self.episodes = episodes
+    func displayFetchedEpisodes(_ viewModel: FetchEpisodes.ViewModel) {
+        self.episodes = viewModel.episodes
         Task { @MainActor in
             collection.reloadData()
         }

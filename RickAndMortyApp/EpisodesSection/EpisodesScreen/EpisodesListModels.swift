@@ -8,12 +8,19 @@
 import Foundation
 import UIKit
 
+typealias FetchEpisodes = EpisodesList.FetchEpisodes
+
 enum EpisodesList {
     enum FetchEpisodes {
-        case request
-        case response(episodes: [NetworkEpisode], 
-                      characters: [(image: UIImage?, 
-                                    character: NetworkCharacter)?])
-        case viewModel(episodes: [Episode])
+        struct Request {}
+        struct Response {
+            var episodes: [NetworkEpisode]
+            var characters: [(image: UIImage?,
+                              character: NetworkCharacter)?]
+            
+        }
+        struct ViewModel {
+            var episodes: [Episode]
+        }
     }
 }
