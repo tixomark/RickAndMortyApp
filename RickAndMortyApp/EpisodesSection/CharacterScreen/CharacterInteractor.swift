@@ -8,7 +8,7 @@
 import Foundation
 
 protocol CharacterInteractorInput {
-    
+    func getCharacter(_ request: GetCharacter.Request)
 }
 
 extension CharacterInteractor: ServiceObtainable {
@@ -26,6 +26,7 @@ extension CharacterInteractor: ServiceObtainable {
 final class CharacterInteractor {
     var presenter: CharacterPresenterInput?
     
+    var character: Character!
     
     deinit {
         print("deinit CharacterInteractor")
@@ -33,6 +34,9 @@ final class CharacterInteractor {
 }
 
 extension CharacterInteractor: CharacterInteractorInput {
-    
+    func getCharacter(_ request: GetCharacter.Request) {
+        let responce = GetCharacter.Responce(character: character)
+        presenter?.presentCharacter(responce)
+    }
 }
 

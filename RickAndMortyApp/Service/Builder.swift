@@ -13,7 +13,9 @@ protocol BuilderProtocol: AnyObject {
 }
 
 protocol ScreenBuilderProtocol: AnyObject {
-    func buildScreen(_ screen: Builder.EpisodesModuleScreen) -> UIViewController
+//    func buildScreen<S: UIViewController>(_ module: Builder.EpisodesModuleScreen) -> S
+    func buildEpisodesScreen() -> EpisodesVC
+    func buildCharacterScreen(_ character: Character) -> CharacterVC
 }
 
 final class Builder: ServiceProtocol, ServiceDistributor {
@@ -33,16 +35,7 @@ final class Builder: ServiceProtocol, ServiceDistributor {
 }
 
 extension Builder: ScreenBuilderProtocol {
-    func buildScreen(_ module: EpisodesModuleScreen) -> UIViewController {
-        switch module {
-        case .episodes:
-            buildEpisodesScreen()
-        case .characterDetail(let character):
-            buildCharacterScreen(character)
-        }
-    }
-    
-    private func buildEpisodesScreen() -> UIViewController {
+    func buildEpisodesScreen() -> EpisodesVC {
         let view = EpisodesVC()
         let interactor = EpisodesInteractor()
         let presenter = EpisodesPresenter()
@@ -52,7 +45,7 @@ extension Builder: ScreenBuilderProtocol {
         serviceInjector?.injectServicesFor(interactor)
         return view
     }
-    private func buildCharacterScreen(_ character: Character) -> UIViewController {
+    func buildCharacterScreen(_ character: Character) -> CharacterVC {
         let view = CharacterVC()
         let interactor = CharacterInteractor()
         let presenter = CharacterPresenter()
@@ -60,6 +53,7 @@ extension Builder: ScreenBuilderProtocol {
         interactor.presenter = presenter
         presenter.view = view
         serviceInjector?.injectServicesFor(interactor)
+        interactor.character = character
         return view
     }
     

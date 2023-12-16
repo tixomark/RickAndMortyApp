@@ -8,8 +8,12 @@
 import Foundation
 import UIKit
 
-protocol EpisodesCoordinatorInput {
+protocol EpisodesCoordinatorInput: AnyObject {
     func showCharacterModule(_ character: Character)
+}
+
+protocol EpisodesDataPassing {
+    
 }
 
 extension EpisodesCoordinator: ServiceObtainable {
@@ -33,11 +37,14 @@ final class EpisodesCoordinator: ChildCoordinator {
     }
     
     func start() {
-        guard let episodes = builder?.buildScreen(.episodes) else {
+        guard let episodesVC = builder?.buildEpisodesScreen()
+        else {
             print("EpisodesCoordinator: can not start")
             return
         }
-        rootController.viewControllers = [episodes]
+        
+        episodesVC.coordinator = self
+        rootController.viewControllers = [episodesVC]
     }
     
     deinit {
@@ -48,10 +55,13 @@ final class EpisodesCoordinator: ChildCoordinator {
 
 extension EpisodesCoordinator: EpisodesCoordinatorInput {
     func showCharacterModule(_ character: Character) {
-        guard let characterVC = builder?.buildScreen(.characterDetail(character)) else {
+        guard let characterVC = builder?.buildCharacterScreen(character)
+        else {
             print("EpisodesCoordinator: can not showCharacterModule")
             return
         }
+        
+        characterVC.coordinator = self
         rootController.pushViewController(characterVC, animated: true)
     }
 }

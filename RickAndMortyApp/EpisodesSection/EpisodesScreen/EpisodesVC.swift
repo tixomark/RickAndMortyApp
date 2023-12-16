@@ -14,11 +14,12 @@ protocol EpisodesVCInput: AnyObject {
 
 final class EpisodesVC: UIViewController {
     var interactor: EpisodesInteractorInput?
+    weak var coordinator: EpisodesCoordinatorInput?
     
     private var headerImage: UIImageView = {
         let image = UIImage(.header)
         let view = UIImageView(image: image)
-        view.backgroundColor = .RMBackgroundColor
+        view.backgroundColor = .RMbackgroundColor
         view.contentMode = .scaleAspectFit
         view.clipsToBounds = true
         return view
@@ -40,7 +41,7 @@ final class EpisodesVC: UIViewController {
                                           collectionViewLayout: layout)
         collection.showsHorizontalScrollIndicator = false
         collection.showsVerticalScrollIndicator = false
-        collection.backgroundColor = .RMBackgroundColor
+        collection.backgroundColor = .RMbackgroundColor
         return collection
     }()
     
@@ -87,7 +88,8 @@ final class EpisodesVC: UIViewController {
             collection.topAnchor.constraint(equalTo: headerImage.bottomAnchor, constant: 16),
             collection.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             collection.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collection.trailingAnchor.constraint(equalTo: view.trailingAnchor)])
+            collection.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
     }
     
     deinit {
@@ -116,8 +118,22 @@ extension EpisodesVC: UICollectionViewDelegateFlowLayout , UICollectionViewDataS
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EpisodeCell.description(), for: indexPath) as! EpisodeCell
+        
         cell.configure(using: episodes[indexPath.item])
+        cell.delegate = self
         
         return cell
     }
+}
+
+extension EpisodesVC: EpisodeCellDelegate {
+    func didTapImage(inCell cell: EpisodeCell) {
+        guard let index = collection.indexPath(for: cell)?.item,
+              let character = episodes[index].character
+        else { return }
+        
+        coordinator?.showCharacterModule(character)
+    }
+    
+    
 }

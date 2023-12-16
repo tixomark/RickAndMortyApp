@@ -12,7 +12,8 @@ enum EpisodesList {
     enum FetchEpisodes {
         case request
         case response(episodes: [NetworkEpisode], 
-                      characters: [(image: UIImage?, character: NetworkCharacter)?])
+                      characters: [(image: UIImage?, 
+                                    character: NetworkCharacter)?])
         case viewModel(episodes: [Episode])
     }
 }

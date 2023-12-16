@@ -7,8 +7,11 @@
 
 import UIKit
 
+protocol EpisodeCellDelegate: AnyObject {
+    func didTapImage(inCell cell: EpisodeCell)
+}
+
 class EpisodeCell: UICollectionViewCell {
-    
     private var mainImageView: UIImageView = {
         let view = UIImageView()
         view.backgroundColor = .red
@@ -16,6 +19,7 @@ class EpisodeCell: UICollectionViewCell {
         view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
+        view.isUserInteractionEnabled = true
         return view
     }()
     
@@ -29,7 +33,7 @@ class EpisodeCell: UICollectionViewCell {
     private var bottomView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 16
-        view.backgroundColor = .RMSecondaryColor
+        view.backgroundColor = .RMsecondaryColor
         return view
     }()
     
@@ -44,12 +48,14 @@ class EpisodeCell: UICollectionViewCell {
     
     private var episodeLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "Roboto-Medium", size: 16)
+        label.font = UIFont(name: "Inter-Regular", size: 16)
         label.numberOfLines = 0
         return label
     }()
     
     private var likeView = LikeView()
+    
+    weak var delegate: EpisodeCellDelegate?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -70,7 +76,7 @@ class EpisodeCell: UICollectionViewCell {
     }
     
     private func setUI() {
-        contentView.backgroundColor = .RMBackgroundColor
+        contentView.backgroundColor = .RMbackgroundColor
         contentView.layer.cornerRadius = 4
         contentView.layer.shadowOffset = CGSize(width: 0, height: 2)
         contentView.layer.shadowColor = UIColor.black.cgColor
@@ -78,6 +84,9 @@ class EpisodeCell: UICollectionViewCell {
         contentView.layer.masksToBounds = false
         
         likeView.delegate = self
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapOnImage))
+        mainImageView.addGestureRecognizer(tapGesture)
         
         bottomView.addSubviews(monitorImageView, episodeLabel, likeView)
         contentView.addSubviews(mainImageView, nameLabel, bottomView)
@@ -114,9 +123,11 @@ class EpisodeCell: UICollectionViewCell {
             likeView.trailingAnchor.constraint(equalTo: bottomView.trailingAnchor, constant: -16),
             likeView.bottomAnchor.constraint(equalTo: bottomView.bottomAnchor, constant: -16),
             likeView.widthAnchor.constraint(equalTo: likeView.heightAnchor)
-            
         ])
-        
+    }
+    
+    @objc private func didTapOnImage() {
+        delegate?.didTapImage(inCell: self)
     }
     
     func configure(using episode: Episode) {
@@ -132,6 +143,4 @@ extension EpisodeCell: LikeViewDelegate {
     func likeView(_ view: LikeView, switchedTo state: LikeView.State) {
         print(state)
     }
-    
-    
 }
