@@ -10,6 +10,7 @@ import UIKit
 
 protocol EpisodesInteractorInput {
     func fetchEpisodes(_ request: FetchEpisodes.Request)
+    func didTapCharacter(_ request: TapCharacter.Request)
 }
 
 extension EpisodesInteractor: ServiceObtainable {
@@ -20,14 +21,27 @@ extension EpisodesInteractor: ServiceObtainable {
     func addServices(_ services: [Service : ServiceProtocol]) {
         networkService = (services[.metwork] as! NetworkServiceProtocol)
     }
+}
+
+protocol CharacterDataEmitter {
+    func emit() -> Character
+}
+extension EpisodesInteractor: CharacterDataEmitter, DataEmitter {
+    var id: String {
+        "EpisodesInteractor"
+    }
     
-    
+    func emit() -> Character {
+        selectedCharacter
+    }
 }
 
 final class EpisodesInteractor {
     var presenter: EpisodesPresenterInput?
     private var networkService: NetworkServiceProtocol?
     
+    private var selectedItemIndex: Int!
+    private var selectedCharacter: Character!
     private var nextPage: String?
     
     deinit {
@@ -36,6 +50,12 @@ final class EpisodesInteractor {
 }
 
 extension EpisodesInteractor: EpisodesInteractorInput {
+    func didTapCharacter(_ request: TapCharacter.Request) {
+        self.selectedCharacter = request.character
+        self.selectedItemIndex = request.index
+    }
+    
+    
     private typealias CharacterData = (image: UIImage?, character: NetworkCharacter)
     
     func fetchEpisodes(_ request: FetchEpisodes.Request) {

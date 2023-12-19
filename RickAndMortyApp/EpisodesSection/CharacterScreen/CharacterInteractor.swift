@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 protocol CharacterInteractorInput {
     func getCharacter(_ request: GetCharacter.Request)
@@ -19,14 +20,23 @@ extension CharacterInteractor: ServiceObtainable {
     func addServices(_ services: [Service : ServiceProtocol]) {
         
     }
-    
-    
+}
+
+protocol CharacterDataReceiver: DataReceiver {
+    func receive(_ character: Character)
+}
+extension CharacterInteractor: CharacterDataReceiver {
+    var id: String { "CharacterInteractor" }
+
+    func receive(_ character: Character) {
+        self.character = character
+    }
 }
 
 final class CharacterInteractor {
     var presenter: CharacterPresenterInput?
     
-    var character: Character!
+    var character: Character?
     
     deinit {
         print("deinit CharacterInteractor")
@@ -35,6 +45,7 @@ final class CharacterInteractor {
 
 extension CharacterInteractor: CharacterInteractorInput {
     func getCharacter(_ request: GetCharacter.Request) {
+        guard let character else { return }
         let responce = GetCharacter.Responce(character: character)
         presenter?.presentCharacter(responce)
     }

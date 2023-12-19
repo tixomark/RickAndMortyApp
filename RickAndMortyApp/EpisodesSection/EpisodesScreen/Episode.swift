@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class Episode {
+struct Episode {
     var id: Int
     var name: String
     var episode: String
@@ -25,7 +25,7 @@ class Episode {
         self.isFavourite = isFavourite
     }
     
-    convenience init?(from episode: NetworkEpisode) {
+    init?(from episode: NetworkEpisode) {
         guard let id = episode.id,
                 let name = episode.name,
                 let episode = episode.episode

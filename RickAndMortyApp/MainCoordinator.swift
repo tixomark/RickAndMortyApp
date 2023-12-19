@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-protocol MainCoordinatorProtocol {
+protocol MainCoordinatorInput {
     
 }
 
@@ -18,32 +18,36 @@ extension MainCoordinator: ServiceObtainable {
     }
     
     func addServices(_ services: [Service : ServiceProtocol]) {
-        builder = (services[.builder] as! BuilderProtocol)
+        builder = (services[.builder] as! (BuilderProtocol & ContainerBuilderProtocol))
     }
 }
 
 
 final class MainCoordinator: ParentCoordinator {
     var childCoordinators: [any ChildCoordinator]
-    var rootController: UITabBarController
-    var builder: BuilderProtocol!
+    var rootController: UITabBarController!
+    var builder: (BuilderProtocol & ContainerBuilderProtocol)!
     
     init() {
-        rootController = TabBarController()
         childCoordinators = []
     }
     
     func start() {
         let episodesCoordinator: EpisodesCoordinator = builder.build(.episodes(parent: self))
+        let favouritesCoordinator: FavouritesCoordinator = builder.build(.favourites(parent: self))
         childCoordinators.append(episodesCoordinator)
-        rootController.viewControllers = [episodesCoordinator.rootController]
+        childCoordinators.append(favouritesCoordinator)
+        
+        rootController = builder.buildMainTabBar([episodesCoordinator.rootController,
+                                                  favouritesCoordinator.rootController])
+        
         episodesCoordinator.start()
+        favouritesCoordinator.start()
     }
     
     func childDidFinish(_ child: any ChildCoordinator) {
         
     }
-    
     
     deinit {
         print("deinit EpisodesNC")
@@ -51,8 +55,7 @@ final class MainCoordinator: ParentCoordinator {
     
 }
 
-extension MainCoordinator: MainCoordinatorProtocol {
-    
+extension MainCoordinator: MainCoordinatorInput {
     
 }
 

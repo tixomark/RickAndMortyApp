@@ -11,6 +11,10 @@ import UIKit
 enum ImageName: String {
     case monitorIcon
     case cameraIcon
+    case homeIconNormal
+    case homeIconSelected
+    case favouritesIconSelected
+    case favouritesIconNormal
     
     case blackLogo
     case header

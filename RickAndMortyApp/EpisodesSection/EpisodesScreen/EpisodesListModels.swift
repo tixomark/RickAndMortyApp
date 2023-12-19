@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 
 typealias FetchEpisodes = EpisodesList.FetchEpisodes
+typealias TapCharacter = EpisodesList.TapCharacter
 
 enum EpisodesList {
     enum FetchEpisodes {
@@ -21,6 +22,13 @@ enum EpisodesList {
         }
         struct ViewModel {
             var episodes: [Episode]
+        }
+    }
+    
+    enum TapCharacter {
+        struct Request {
+            var character: Character
+            var index: Int
         }
     }
 }

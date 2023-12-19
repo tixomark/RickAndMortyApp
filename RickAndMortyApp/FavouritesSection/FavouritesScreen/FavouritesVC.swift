@@ -1,5 +1,5 @@
 //
-//  EpisodesVC.swift
+//  FavouritesVC.swift
 //  RickAndMortyApp
 //
 //  Created by Tixon Markin on 12.12.2023.
@@ -8,20 +8,11 @@
 import Foundation
 import UIKit
 
-protocol EpisodesVCInput: AnyObject {
-    func displayFetchedEpisodes(_ viewModel: FetchEpisodes.ViewModel)
+protocol FavouritesVCInput: AnyObject {
+    func displayFavouriteEpisodes(_ viewModel: FetchFavouriteEpisodes.ViewModel)
 }
 
-final class EpisodesVC: UIViewController {
-    private var headerImage: UIImageView = {
-        let image = UIImage(.header)
-        let view = UIImageView(image: image)
-        view.backgroundColor = .RMbackgroundColor
-        view.contentMode = .scaleAspectFit
-        view.clipsToBounds = true
-        return view
-    }()
-    
+final class FavouritesVC: UIViewController {
     private var collection: UICollectionView = {
         let spaceing: CGFloat = 16
         let inset: CGFloat = 24
@@ -45,12 +36,12 @@ final class EpisodesVC: UIViewController {
     private var cellSize: CGSize!
     private var episodes: [Episode] = []
     
-    var interactor: EpisodesInteractorInput?
-    weak var coordinator: EpisodesCoordinatorInput?
+    var interactor: FavouritesInteractorInput?
+    weak var coordinator: FavouritesCoordinatorInput?
     
-
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         
         setUI()
         collection.dataSource = self
@@ -58,8 +49,8 @@ final class EpisodesVC: UIViewController {
         collection.register(EpisodeCell.self,
                             forCellWithReuseIdentifier: EpisodeCell.description())
         
-        let request = FetchEpisodes.Request()
-        interactor?.fetchEpisodes(request)
+        let request = FetchFavouriteEpisodes.Request()
+        interactor?.fetchFavouriteEpisodes(request)
     }
     
     private var isLayoutCreated = false
@@ -76,18 +67,14 @@ final class EpisodesVC: UIViewController {
         let estimatedCellSize: CGSize = .init(width: view.bounds.width - 48,
                                       height: UIView.layoutFittingExpandedSize.height)
         (collection.collectionViewLayout as? UICollectionViewFlowLayout)?.estimatedItemSize = estimatedCellSize
-        view.addSubviews(headerImage, collection)
+        view.addSubviews(collection)
         
     }
     
     private func setConstraints() {
-        UIView.doNotTranslateAutoLayoutIntoConstraints(for: headerImage, collection)
+        UIView.doNotTranslateAutoLayoutIntoConstraints(for: collection)
         NSLayoutConstraint.activate([
-            headerImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            headerImage.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            headerImage.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            
-            collection.topAnchor.constraint(equalTo: headerImage.bottomAnchor, constant: 16),
+            collection.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             collection.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             collection.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collection.trailingAnchor.constraint(equalTo: view.trailingAnchor)
@@ -95,12 +82,12 @@ final class EpisodesVC: UIViewController {
     }
     
     deinit {
-        print("deinit EpisodesVC")
+        print("deinit FavouritesVC")
     }
 }
 
-extension EpisodesVC: EpisodesVCInput {
-    func displayFetchedEpisodes(_ viewModel: FetchEpisodes.ViewModel) {
+extension FavouritesVC: FavouritesVCInput {
+    func displayFavouriteEpisodes(_ viewModel: FetchFavouriteEpisodes.ViewModel) {
         self.episodes = viewModel.episodes
         Task { @MainActor in
             collection.reloadData()
@@ -110,7 +97,7 @@ extension EpisodesVC: EpisodesVCInput {
     
 }
 
-extension EpisodesVC: UICollectionViewDelegateFlowLayout , UICollectionViewDataSource {
+extension FavouritesVC: UICollectionViewDelegateFlowLayout , UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         episodes.count
     }
@@ -125,17 +112,15 @@ extension EpisodesVC: UICollectionViewDelegateFlowLayout , UICollectionViewDataS
     }
 }
 
-extension EpisodesVC: EpisodeCellDelegate {
+extension FavouritesVC: EpisodeCellDelegate {
     func didTapImage(inCell cell: EpisodeCell) {
         guard let index = collection.indexPath(for: cell)?.item,
               let character = episodes[index].character
         else { return }
-        
-        let request = TapCharacter.Request(character: character, index: index)
-        interactor?.didTapCharacter(request)
         
         coordinator?.showCharacterScreen()
     }
     
     
 }
+

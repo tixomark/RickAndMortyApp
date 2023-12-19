@@ -10,7 +10,7 @@ import UIKit
 
 protocol CoordinatorProtocol {
     associatedtype RootController: UIViewController
-    var rootController: RootController {get}
+    var rootController: RootController! {get}
     
     func start()
 }

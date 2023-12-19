@@ -12,9 +12,14 @@ class TabBarController: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.tabBar.tintColor = .blue
+        tabBar.backgroundColor = .RMbackgroundColor
+        tabBar.layer.shadowColor = UIColor.black.cgColor
+        tabBar.layer.shadowRadius = 2
+        tabBar.layer.shadowOpacity = 0.17
+        
+        tabBar.itemPositioning = .centered
+       
     }
-    
     
     deinit {
         print("deinit TabBarController")

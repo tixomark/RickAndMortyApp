@@ -9,9 +9,8 @@ import Foundation
 import UIKit
 
 final class FavouritesNC: UINavigationController {
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
     }
 }

@@ -24,7 +24,7 @@ extension EpisodesPresenter: EpisodesPresenterInput {
         var episodes = [Episode]()
         
         for (index, netEpisode) in responce.episodes.enumerated() {
-            guard let episode = Episode(from: netEpisode)
+            guard var episode = Episode(from: netEpisode)
             else { continue }
             
             episodes.append(episode)
@@ -32,14 +32,12 @@ extension EpisodesPresenter: EpisodesPresenterInput {
             guard let characterData = responce.characters[index]
             else { continue }
             
-            let character = Character(from: characterData.character)
+            var character = Character(from: characterData.character)
             character?.image = characterData.image
-            episode.character = character
+            episodes[index].character = character
         }
         
         let viewModel = FetchEpisodes.ViewModel(episodes: episodes)
         view?.displayFetchedEpisodes(viewModel)
     }
-    
-    
 }

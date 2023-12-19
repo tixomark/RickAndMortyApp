@@ -8,13 +8,13 @@
 import Foundation
 import UIKit
 
-protocol FavouritesCoordinatorInput {
-    
+protocol FavouritesCoordinatorInput: AnyObject {
+    func showCharacterScreen()
 }
 
 extension FavouritesCoordinator: ServiceObtainable {
     var neededServices: [Service] {
-        [.builder]
+        [.builder, .dataPasser]
     }
     
     func addServices(_ services: [Service : ServiceProtocol]) {
@@ -23,7 +23,7 @@ extension FavouritesCoordinator: ServiceObtainable {
 }
 
 final class FavouritesCoordinator: ChildCoordinator {
-    var rootController: UINavigationController
+    var rootController: UINavigationController!
     var parent: any ParentCoordinator
     private var builder: ScreenBuilderProtocol?
     
@@ -33,8 +33,21 @@ final class FavouritesCoordinator: ChildCoordinator {
     }
     
     func start() {
+        guard let favouritesVC: FavouritesVC = builder?.buildScreen(.favourites)
+        else {
+            print("EpisodesCoordinator: can not start")
+            return
+        }
         
+        favouritesVC.coordinator = self
+        rootController.viewControllers = [favouritesVC]
     }
     
     
+}
+
+extension FavouritesCoordinator: FavouritesCoordinatorInput {
+    func showCharacterScreen() {
+        
+    }
 }

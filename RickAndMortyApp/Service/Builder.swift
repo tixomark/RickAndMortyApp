@@ -13,18 +13,21 @@ protocol BuilderProtocol: AnyObject {
 }
 
 protocol ScreenBuilderProtocol: AnyObject {
-//    func buildScreen<S: UIViewController>(_ module: Builder.EpisodesModuleScreen) -> S
-    func buildEpisodesScreen() -> EpisodesVC
-    func buildCharacterScreen(_ character: Character) -> CharacterVC
+    func buildScreen<S: UIViewController>(_ module: Builder.Screen) -> S
+}
+
+protocol ContainerBuilderProtocol: AnyObject {
+    func buildMainTabBar(_ viewControllers: [UIViewController]) -> TabBarController
 }
 
 final class Builder: ServiceProtocol, ServiceDistributor {
     var description: String { "ModuleBuilder service"}
     weak var serviceInjector: ServiceInjectorProtocol?
     
-    enum EpisodesModuleScreen {
+    enum Screen {
         case episodes
-        case characterDetail(_ character: Character)
+        case characterDetail
+        case favourites
     }
     enum Coordinator {
         case main
@@ -34,8 +37,47 @@ final class Builder: ServiceProtocol, ServiceDistributor {
     
 }
 
+extension Builder: ContainerBuilderProtocol {
+    func buildMainTabBar(_ viewControllers: [UIViewController]) -> TabBarController {
+        let item0 = UITabBarItem(title: nil,
+                                 image: .homeIconNormal.withRenderingMode(.alwaysOriginal),
+                                 selectedImage: .homeIconSelected.withRenderingMode(.alwaysOriginal))
+        let item1 = UITabBarItem(title: nil,
+                                 image: .favouritesIconNormal.withRenderingMode(.alwaysOriginal),
+                                 selectedImage: .favouritesIconSelected.withRenderingMode(.alwaysOriginal))
+        
+        let imageInset = UIEdgeInsets(top: 8, left: 0, bottom: -8, right: 0)
+        item0.imageInsets = imageInset
+        item1.imageInsets = imageInset
+        
+        viewControllers[0].tabBarItem = item0
+        viewControllers[1].tabBarItem = item1
+
+        let controller = TabBarController()
+        
+        controller.setViewControllers(viewControllers, animated: false)
+        controller.selectedIndex = 0
+        
+        return controller
+    }
+
+    
+    
+}
+
 extension Builder: ScreenBuilderProtocol {
-    func buildEpisodesScreen() -> EpisodesVC {
+    func buildScreen<S: UIViewController>(_ module: Screen) -> S {
+        switch module {
+        case .episodes:
+            buildEpisodesScreen() as! S
+        case .characterDetail:
+            buildCharacterScreen() as! S
+        case .favourites:
+            buildFavouritesScreen() as! S
+        }
+    }
+    
+    private func buildEpisodesScreen() -> EpisodesVC {
         let view = EpisodesVC()
         let interactor = EpisodesInteractor()
         let presenter = EpisodesPresenter()
@@ -45,7 +87,7 @@ extension Builder: ScreenBuilderProtocol {
         serviceInjector?.injectServicesFor(interactor)
         return view
     }
-    func buildCharacterScreen(_ character: Character) -> CharacterVC {
+    private func buildCharacterScreen() -> CharacterVC {
         let view = CharacterVC()
         let interactor = CharacterInteractor()
         let presenter = CharacterPresenter()
@@ -53,7 +95,16 @@ extension Builder: ScreenBuilderProtocol {
         interactor.presenter = presenter
         presenter.view = view
         serviceInjector?.injectServicesFor(interactor)
-        interactor.character = character
+        return view
+    }
+    private func buildFavouritesScreen() -> FavouritesVC {
+        let view = FavouritesVC()
+        let interactor = FavouritesInteractor()
+        let presenter = FavouritesPresenter()
+        view.interactor = interactor
+        interactor.presenter = presenter
+        presenter.view = view
+        serviceInjector?.injectServicesFor(interactor)
         return view
     }
     

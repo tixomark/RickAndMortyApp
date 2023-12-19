@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class Character {
+struct Character {
     var id: Int
     var name, gender, status: String
     var species, origin, type, location: String
@@ -34,7 +34,7 @@ class Character {
         self.image = image
     }
     
-    convenience init?(from character: NetworkCharacter) {
+    init?(from character: NetworkCharacter) {
         guard let id = character.id,
               let name = character.name,
                 let gender = character.gender,

@@ -22,12 +22,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let serviceInjector = ServiceInjector()
         let builder = serviceInjector.getBuilder()
         let mainCoordinator = builder.build(.main) as MainCoordinator
+        mainCoordinator.start()
         
         window = UIWindow(windowScene: scene)
         window?.rootViewController = mainCoordinator.rootController
         window?.makeKeyAndVisible()
         
-        mainCoordinator.start()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

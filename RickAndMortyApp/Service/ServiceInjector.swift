@@ -23,6 +23,7 @@ class ServiceInjector {
         let bulder = Builder()
         bulder.serviceInjector = self
         allServices[.builder] = bulder
+        allServices[.dataPasser] = DataPasser()
     }
 }
 
