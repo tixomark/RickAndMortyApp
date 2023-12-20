@@ -63,19 +63,19 @@ class EpisodeCell: UICollectionViewCell {
         setConstraints()
     }
     
-//    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
-//        let size = contentView.systemLayoutSizeFitting(layoutAttributes.frame.size,
-//                                                       withHorizontalFittingPriority: .required,
-//                                                       verticalFittingPriority: .fittingSizeLevel)
-//        layoutAttributes.frame.size = size
-//        return layoutAttributes
-//    }
-    
-//    override func sizeThatFits(_ size: CGSize) -> CGSize {
-//        contentView.systemLayoutSizeFitting(size,
-//                                                               withHorizontalFittingPriority: .required,
-//                                            verticalFittingPriority: .fittingSizeLevel)
-//    }
+    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        
+        setNeedsLayout()
+        layoutIfNeeded()
+        
+        var size = contentView.systemLayoutSizeFitting(layoutAttributes.size,
+                                                       withHorizontalFittingPriority: .required,
+                                                       verticalFittingPriority: .fittingSizeLevel)
+        
+        size.height = size.height.rounded()
+        layoutAttributes.frame.size = size
+        return layoutAttributes
+    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -99,9 +99,14 @@ class EpisodeCell: UICollectionViewCell {
     }
     
     private func setConstraints() {
-        UIView.doNotTranslateAutoLayoutIntoConstraints(for:  mainImageView, nameLabel, bottomView, monitorImageView, episodeLabel, likeView)
+        UIView.doNotTranslateAutoLayoutIntoConstraints(for:  mainImageView, nameLabel, bottomView, monitorImageView, episodeLabel, likeView, contentView)
 
         NSLayoutConstraint.activate([
+            contentView.topAnchor.constraint(equalTo: self.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            
             mainImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
             mainImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             mainImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
@@ -110,7 +115,7 @@ class EpisodeCell: UICollectionViewCell {
             nameLabel.topAnchor.constraint(equalTo: mainImageView.bottomAnchor, constant: 16),
             nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            nameLabel.heightAnchor.constraint(equalToConstant: 54),
+//            nameLabel.heightAnchor.constraint(equalToConstant: 54),
             
             bottomView.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 16),
             bottomView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),

@@ -60,6 +60,7 @@ final class EpisodesVC: UIViewController {
         collection.register(EpisodeCell.self,
                             forCellWithReuseIdentifier: EpisodeCell.description())
         
+        
         let request = FetchEpisodes.Request()
         interactor?.fetchEpisodes(request)
     }
@@ -67,9 +68,9 @@ final class EpisodesVC: UIViewController {
     private func setUI() {
         self.view.backgroundColor = .RMbackgroundColor
         
-//        let estimatedCellSize: CGSize = .init(width: view.bounds.width - 48,
-//                                      height: 100)
-//        (collection.collectionViewLayout as? UICollectionViewFlowLayout)?.estimatedItemSize = estimatedCellSize
+        let estimatedCellSize: CGSize = .init(width: view.bounds.width - 48,
+                                      height: 450)
+        (collection.collectionViewLayout as? UICollectionViewFlowLayout)?.estimatedItemSize = estimatedCellSize
         
         view.addSubviews(headerImage, collection)
         
@@ -129,16 +130,6 @@ extension EpisodesVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSo
         cell.delegate = self
         
         return cell
-    }
-    
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        if cellSize == nil {
-            cellSize = EpisodeCell().contentView.systemLayoutSizeFitting(CGSize(width: view.bounds.width - 48, height: 1000),
-                                                                   withHorizontalFittingPriority: .required,
-                                                verticalFittingPriority: .fittingSizeLevel)
-        }
-        return cellSize
     }
    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
