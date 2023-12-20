@@ -35,5 +35,16 @@ struct Episode {
                   name: name,
                   episode: episode)
     }
+    
+    init(from episode: DBEpisode) {
+        self.init(id: Int(episode.id),
+                  name: episode.name,
+                  episode: episode.episode,
+                  isFavourite: episode.isFavourite)
+        
+        if let character = episode.character {
+            self.character = Character(from: character)
+        }
+    }
 }
 

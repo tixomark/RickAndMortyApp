@@ -21,7 +21,12 @@ final class FavouritesPresenter {
 
 extension FavouritesPresenter: FavouritesPresenterInput {
     func presentFavouriteEpisodes(_ responce: FetchFavouriteEpisodes.Response) {
+        let episodes = responce.episodes.map { episode in
+            Episode(from: episode)
+        }
         
+        let viewModel = FetchFavouriteEpisodes.ViewModel(episodes: episodes)
+        view?.displayFavouriteEpisodes(viewModel)
     }
     
     

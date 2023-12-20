@@ -54,4 +54,15 @@ struct Character {
                   type: type,
                   location: location)
     }
+    
+    init(from character: DBCharacter) {
+        self.init(id: Int(character.id),
+                  name: character.name,
+                  gender: character.gender, 
+                  status: character.status, 
+                  species: character.species, 
+                  origin: character.origin, 
+                  type: character.type, 
+                  location: character.location)
+    }
 }

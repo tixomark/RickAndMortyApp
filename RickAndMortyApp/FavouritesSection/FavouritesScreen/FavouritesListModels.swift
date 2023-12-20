@@ -14,7 +14,7 @@ enum FavouritesList {
     enum FetchFavouriteEpisodes {
         struct Request {}
         struct Response {
-            var episodes: [Episode]
+            var episodes: [DBEpisode]
         }
         struct ViewModel {
             var episodes: [Episode]

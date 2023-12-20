@@ -14,20 +14,17 @@ protocol FavouritesInteractorInput {
 
 extension FavouritesInteractor: ServiceObtainable {
     var neededServices: [Service] {
-        []
+        [.dataStore]
     }
     
     func addServices(_ services: [Service : ServiceProtocol]) {
-        
+        dataStore = (services[.dataStore] as! DataStoreProtocol)
     }
-    
-    
 }
 
 final class FavouritesInteractor {
     var presenter: FavouritesPresenterInput?
-    
-    private var nextPage: String?
+    private var dataStore: DataStoreProtocol?
     
     deinit {
         print("deinit FavouritesInteractor")
@@ -36,7 +33,12 @@ final class FavouritesInteractor {
 
 extension FavouritesInteractor: FavouritesInteractorInput {
     func fetchFavouriteEpisodes(_ request: FetchFavouriteEpisodes.Request) {
-        
+        Task(priority: .userInitiated) {
+            guard let episodes = dataStore?.fetchEpisodes()
+            else { return }
+            let responce = FetchFavouriteEpisodes.Response(episodes: episodes)
+            presenter?.presentFavouriteEpisodes(responce)
+        }
     }
     
     

@@ -42,7 +42,6 @@ final class EpisodesVC: UIViewController {
         return collection
     }()
     
-    private var cellSize: CGSize!
     private var episodes: [Episode] = []
     private var isWaitingForUpdate = true
     private var isLastPageReached = false
@@ -153,6 +152,7 @@ extension EpisodesVC: EpisodeCellDelegate {
         guard let index = collection.indexPath(for: cell)?.item
         else { return }
         
+        episodes[index].isFavourite = (state == .selected)
         let episode = episodes[index]
         
         let request = TapLikeButton.Request(episode: episode, state: state)

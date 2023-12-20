@@ -15,6 +15,7 @@ protocol DataStoreProtocol {
     func deleteEpisode(_ id: Int)
     
     func fetchEpisode(_ id: Int) -> DBEpisode? 
+    func fetchEpisodes() -> [DBEpisode]
 }
 
 final class DataStore: ServiceProtocol {
@@ -76,5 +77,16 @@ extension DataStore: DataStoreProtocol {
             let episode = try? context.fetch(request).first
             return episode
         }
+    }
+    
+    func fetchEpisodes() -> [DBEpisode] {
+        
+        
+        let request = DBEpisode.fetchRequest()
+        request.includesSubentities = true
+        
+            let episodes = try? context.fetch(request)
+            return episodes ?? []
+        
     }
 }

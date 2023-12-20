@@ -13,6 +13,15 @@ protocol FavouritesVCInput: AnyObject {
 }
 
 final class FavouritesVC: UIViewController {
+    private var header: UILabel = {
+        let label = UILabel()
+        label.font = UIFont(name: "Karla-Bold",
+                            size: 24)
+        label.text = "Favourite Episodes"
+        label.numberOfLines = 1
+        return label
+    }()
+    
     private var collection: UICollectionView = {
         let spaceing: CGFloat = 16
         let inset: CGFloat = 24
@@ -33,7 +42,6 @@ final class FavouritesVC: UIViewController {
         return collection
     }()
     
-    private var cellSize: CGSize!
     private var episodes: [Episode] = []
     
     var interactor: FavouritesInteractorInput?
@@ -42,8 +50,9 @@ final class FavouritesVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         setUI()
+        setConstraints()
+        
         collection.dataSource = self
         collection.delegate = self
         collection.register(EpisodeCell.self,
@@ -53,29 +62,25 @@ final class FavouritesVC: UIViewController {
         interactor?.fetchFavouriteEpisodes(request)
     }
     
-    private var isLayoutCreated = false
-    override func updateViewConstraints() {
-        defer { super.updateViewConstraints() }
-        if !isLayoutCreated {
-            isLayoutCreated = true
-            setConstraints()
-        }
-    }
-    
     private func setUI() {
-        self.view.backgroundColor = .rmBackground
+        self.view.backgroundColor = .RMbackgroundColor
+        
         let estimatedCellSize: CGSize = .init(width: view.bounds.width - 48,
-                                      height: UIView.layoutFittingExpandedSize.height)
+                                      height: 450)
         (collection.collectionViewLayout as? UICollectionViewFlowLayout)?.estimatedItemSize = estimatedCellSize
-        view.addSubviews(collection)
+        
+        view.addSubviews(header, collection)
         
     }
     
     private func setConstraints() {
-        UIView.doNotTranslateAutoLayoutIntoConstraints(for: collection)
+        UIView.doNotTranslateAutoLayoutIntoConstraints(for: header, collection)
         NSLayoutConstraint.activate([
-            collection.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            collection.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -10),
+            header.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            collection.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 29),
+            collection.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             collection.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collection.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
