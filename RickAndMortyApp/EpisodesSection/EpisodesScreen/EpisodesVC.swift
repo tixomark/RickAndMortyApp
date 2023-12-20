@@ -44,15 +44,17 @@ final class EpisodesVC: UIViewController {
     
     private var cellSize: CGSize!
     private var episodes: [Episode] = []
+    private var isWaitingForUpdate = true
+    private var isLastPageReached = false
     
     var interactor: EpisodesInteractorInput?
     weak var coordinator: EpisodesCoordinatorInput?
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setUI()
+        setConstraints()
         collection.dataSource = self
         collection.delegate = self
         collection.register(EpisodeCell.self,
@@ -62,20 +64,13 @@ final class EpisodesVC: UIViewController {
         interactor?.fetchEpisodes(request)
     }
     
-    private var isLayoutCreated = false
-    override func updateViewConstraints() {
-        defer { super.updateViewConstraints() }
-        if !isLayoutCreated {
-            isLayoutCreated = true
-            setConstraints()
-        }
-    }
-    
     private func setUI() {
-        self.view.backgroundColor = .rmBackground
-        let estimatedCellSize: CGSize = .init(width: view.bounds.width - 48,
-                                      height: UIView.layoutFittingExpandedSize.height)
-        (collection.collectionViewLayout as? UICollectionViewFlowLayout)?.estimatedItemSize = estimatedCellSize
+        self.view.backgroundColor = .RMbackgroundColor
+        
+//        let estimatedCellSize: CGSize = .init(width: view.bounds.width - 48,
+//                                      height: 100)
+//        (collection.collectionViewLayout as? UICollectionViewFlowLayout)?.estimatedItemSize = estimatedCellSize
+        
         view.addSubviews(headerImage, collection)
         
     }
@@ -88,7 +83,7 @@ final class EpisodesVC: UIViewController {
             headerImage.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             
             collection.topAnchor.constraint(equalTo: headerImage.bottomAnchor, constant: 16),
-            collection.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            collection.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             collection.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collection.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
@@ -101,16 +96,28 @@ final class EpisodesVC: UIViewController {
 
 extension EpisodesVC: EpisodesVCInput {
     func displayFetchedEpisodes(_ viewModel: FetchEpisodes.ViewModel) {
-        self.episodes = viewModel.episodes
-        Task { @MainActor in
-            collection.reloadData()
+        self.isLastPageReached = viewModel.lastPage
+        
+        let startIndex = self.episodes.count
+        let endIndex = startIndex + viewModel.episodes.count - 1
+        
+        var indexesToInsert = [IndexPath]()
+        for index in startIndex...endIndex {
+            indexesToInsert.append(IndexPath(item: index, section: 0))
         }
+        
+        print(startIndex...endIndex)
+        self.episodes += viewModel.episodes
+
+        Task(priority: .high) { @MainActor in
+            self.collection.insertItems(at: indexesToInsert)
+            self.isWaitingForUpdate = false
+        }
+        
     }
-    
-    
 }
 
-extension EpisodesVC: UICollectionViewDelegateFlowLayout , UICollectionViewDataSource {
+extension EpisodesVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         episodes.count
     }
@@ -122,6 +129,31 @@ extension EpisodesVC: UICollectionViewDelegateFlowLayout , UICollectionViewDataS
         cell.delegate = self
         
         return cell
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if cellSize == nil {
+            cellSize = EpisodeCell().contentView.systemLayoutSizeFitting(CGSize(width: view.bounds.width - 48, height: 1000),
+                                                                   withHorizontalFittingPriority: .required,
+                                                verticalFittingPriority: .fittingSizeLevel)
+        }
+        return cellSize
+    }
+   
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard !isWaitingForUpdate && !isLastPageReached
+        else { return }
+        
+        let height = scrollView.frame.size.height
+            let contentYOffset = scrollView.contentOffset.y
+            let distanceFromBottom = scrollView.contentSize.height - contentYOffset
+     
+        if distanceFromBottom < height + 2000 {
+            isWaitingForUpdate = true
+            let request = FetchEpisodes.Request(nextPage: true)
+            interactor?.fetchEpisodes(request)
+        }
     }
 }
 
@@ -136,6 +168,8 @@ extension EpisodesVC: EpisodeCellDelegate {
         
         coordinator?.showCharacterScreen()
     }
-    
+}
+
+extension EpisodesVC: UIScrollViewDelegate {
     
 }

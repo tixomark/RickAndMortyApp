@@ -39,10 +39,16 @@ extension EpisodesInteractor: CharacterDataEmitter, DataEmitter {
 final class EpisodesInteractor {
     var presenter: EpisodesPresenterInput?
     private var networkService: NetworkServiceProtocol?
+    private var imageCache: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+//        cache.countLimit = 100
+        return cache
+    }()
     
     private var selectedItemIndex: Int!
     private var selectedCharacter: Character!
     private var nextPage: String?
+    private var isLastPage: Bool = false
     
     deinit {
         print("deinit EpisodesInteractor")
@@ -55,19 +61,30 @@ extension EpisodesInteractor: EpisodesInteractorInput {
         self.selectedItemIndex = request.index
     }
     
-    
     private typealias CharacterData = (image: UIImage?, character: NetworkCharacter)
     
     func fetchEpisodes(_ request: FetchEpisodes.Request) {
         Task(priority: .userInitiated) { () -> () in
-            let result: Response<NetworkEpisode>? = await networkService?.getPage(pagePath: nil)
+            if request.nextPage == false {
+                self.nextPage = nil
+                self.isLastPage = false
+            }
+            guard !self.isLastPage else {
+                return
+            }
+            
+            let result: Response<NetworkEpisode>? = await networkService?.getPage(pagePath: self.nextPage)
             guard let episodes = result?.results
             else { return }
             
-            let characterData = await self.fetchRandomCharactersData(fromEpisodes: episodes)
+            self.nextPage = result?.info?.next
+            self.isLastPage = result?.info?.next == nil
             
+            let characterData = await self.fetchRandomCharactersData(fromEpisodes: episodes)
             let responce = FetchEpisodes.Response(episodes: episodes,
-                                                  characters: characterData)
+                                                  characters: characterData,
+                                                  lastPage: self.isLastPage)
+            
             presenter?.presentFetchedEpisodes(responce)
         }
     }
@@ -103,13 +120,25 @@ extension EpisodesInteractor: EpisodesInteractorInput {
         guard let character = await self.networkService?.getCharacterBy(path: path)
         else { return nil }
         
-        guard let imagePath = character.image
-        else {
-            return (nil, character)
-        }
+        let image = await getImageFor(character)
         
-        let image = await self.networkService?.getImage(atPath: imagePath)
         return (image, character)
+    }
+    
+    private func getImageFor(_ character: NetworkCharacter) async -> UIImage? {
+        let id = "\(character.id!)" as NSString
+        var image: UIImage?
+        
+        if let imageFromCache = imageCache.object(forKey: id) {
+            image = imageFromCache
+        } else if let imagePath = character.image {
+            image = await self.networkService?.getImage(atPath: imagePath)
+            
+            if let image {
+                imageCache.setObject(image, forKey: id)
+            }
+        }
+        return image
     }
 }
 

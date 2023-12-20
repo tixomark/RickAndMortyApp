@@ -24,7 +24,7 @@ extension EpisodesPresenter: EpisodesPresenterInput {
         var episodes = [Episode]()
         
         for (index, netEpisode) in responce.episodes.enumerated() {
-            guard var episode = Episode(from: netEpisode)
+            guard let episode = Episode(from: netEpisode)
             else { continue }
             
             episodes.append(episode)
@@ -37,7 +37,8 @@ extension EpisodesPresenter: EpisodesPresenterInput {
             episodes[index].character = character
         }
         
-        let viewModel = FetchEpisodes.ViewModel(episodes: episodes)
+        let viewModel = FetchEpisodes.ViewModel(episodes: episodes,
+                                                lastPage: responce.lastPage)
         view?.displayFetchedEpisodes(viewModel)
     }
 }

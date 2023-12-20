@@ -8,7 +8,7 @@
 import Foundation
 
 enum Service {
-    case metwork, builder, dataPasser
+    case metwork, builder, dataPasser//, cacher
 }
 
 protocol ServiceProtocol: CustomStringConvertible {}

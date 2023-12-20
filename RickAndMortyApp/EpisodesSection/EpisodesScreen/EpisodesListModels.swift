@@ -13,15 +13,19 @@ typealias TapCharacter = EpisodesList.TapCharacter
 
 enum EpisodesList {
     enum FetchEpisodes {
-        struct Request {}
+        struct Request {
+            var nextPage: Bool = false
+        }
         struct Response {
             var episodes: [NetworkEpisode]
             var characters: [(image: UIImage?,
                               character: NetworkCharacter)?]
+            var lastPage: Bool
             
         }
         struct ViewModel {
             var episodes: [Episode]
+            var lastPage: Bool
         }
     }
     
@@ -31,4 +35,6 @@ enum EpisodesList {
             var index: Int
         }
     }
+    
+    
 }

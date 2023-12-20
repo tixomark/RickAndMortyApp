@@ -13,7 +13,9 @@ protocol LikeViewDelegate: AnyObject {
 }
 
 class LikeView: UIView {
-    enum State { case selected, normal }
+    enum State {
+        case selected, normal
+    }
     
     private var isSelected: Bool = false {
         willSet {
