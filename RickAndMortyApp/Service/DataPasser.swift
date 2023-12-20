@@ -21,8 +21,8 @@ protocol DataPasserProtocol {
     func getReceiver(_ id: String) -> DataReceiver?
 }
 
-class DataPasser: ServiceProtocol, DataPasserProtocol {
-    var description: String { "DataPasser"}
+final class DataPasser: ServiceProtocol, DataPasserProtocol {
+    var description: String { "DataPasser service"}
     
     enum Entity {
         case emitter(_ emitter: any DataEmitter, id: String)

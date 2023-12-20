@@ -149,6 +149,16 @@ extension EpisodesVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSo
 }
 
 extension EpisodesVC: EpisodeCellDelegate {
+    func didTapLikeButton(in cell: EpisodeCell, newState state: LikeView.State) {
+        guard let index = collection.indexPath(for: cell)?.item
+        else { return }
+        
+        let episode = episodes[index]
+        
+        let request = TapLikeButton.Request(episode: episode, state: state)
+        interactor?.didTapLike(request)
+    }
+    
     func didTapImage(inCell cell: EpisodeCell) {
         guard let index = collection.indexPath(for: cell)?.item,
               let character = episodes[index].character
@@ -159,8 +169,4 @@ extension EpisodesVC: EpisodeCellDelegate {
         
         coordinator?.showCharacterScreen()
     }
-}
-
-extension EpisodesVC: UIScrollViewDelegate {
-    
 }

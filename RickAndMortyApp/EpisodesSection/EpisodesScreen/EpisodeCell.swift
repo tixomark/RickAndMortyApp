@@ -9,6 +9,7 @@ import UIKit
 
 protocol EpisodeCellDelegate: AnyObject {
     func didTapImage(inCell cell: EpisodeCell)
+    func didTapLikeButton(in cell: EpisodeCell, newState state: LikeView.State)
 }
 
 class EpisodeCell: UICollectionViewCell {
@@ -115,7 +116,6 @@ class EpisodeCell: UICollectionViewCell {
             nameLabel.topAnchor.constraint(equalTo: mainImageView.bottomAnchor, constant: 16),
             nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-//            nameLabel.heightAnchor.constraint(equalToConstant: 54),
             
             bottomView.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 16),
             bottomView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
@@ -154,6 +154,6 @@ class EpisodeCell: UICollectionViewCell {
 
 extension EpisodeCell: LikeViewDelegate {
     func likeView(_ view: LikeView, switchedTo state: LikeView.State) {
-        print(state)
+        delegate?.didTapLikeButton(in: self, newState: state)
     }
 }

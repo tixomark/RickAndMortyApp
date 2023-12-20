@@ -10,6 +10,7 @@ import UIKit
 
 typealias FetchEpisodes = EpisodesList.FetchEpisodes
 typealias TapCharacter = EpisodesList.TapCharacter
+typealias TapLikeButton = EpisodesList.TapLikeButton
 
 enum EpisodesList {
     enum FetchEpisodes {
@@ -33,6 +34,13 @@ enum EpisodesList {
         struct Request {
             var character: Character
             var index: Int
+        }
+    }
+    
+    enum TapLikeButton {
+        struct Request {
+            var episode: Episode
+            var state: LikeView.State
         }
     }
     

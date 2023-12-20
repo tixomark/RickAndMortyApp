@@ -11,7 +11,7 @@ protocol ServiceInjectorProtocol: AnyObject {
     func injectServicesFor(_ object: ServiceObtainable)
 }
 
-class ServiceInjector {
+final class ServiceInjector {
     private var allServices: [Service: any ServiceProtocol] = [:]
     
     func getBuilder() -> Builder {
@@ -24,6 +24,7 @@ class ServiceInjector {
         bulder.serviceInjector = self
         allServices[.builder] = bulder
         allServices[.dataPasser] = DataPasser()
+        allServices[.dataStore] = DataStore()
     }
 }
 

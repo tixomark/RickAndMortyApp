@@ -113,6 +113,10 @@ extension FavouritesVC: UICollectionViewDelegateFlowLayout , UICollectionViewDat
 }
 
 extension FavouritesVC: EpisodeCellDelegate {
+    func didTapLikeButton(in cell: EpisodeCell, newState state: LikeView.State) {
+        
+    }
+    
     func didTapImage(inCell cell: EpisodeCell) {
         guard let index = collection.indexPath(for: cell)?.item,
               let character = episodes[index].character

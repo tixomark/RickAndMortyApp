@@ -10,16 +10,18 @@ import UIKit
 
 protocol EpisodesInteractorInput {
     func fetchEpisodes(_ request: FetchEpisodes.Request)
+    func didTapLike(_ request: TapLikeButton.Request)
     func didTapCharacter(_ request: TapCharacter.Request)
 }
 
 extension EpisodesInteractor: ServiceObtainable {
     var neededServices: [Service] {
-        [.metwork]
+        [.metwork, .dataStore]
     }
     
     func addServices(_ services: [Service : ServiceProtocol]) {
         networkService = (services[.metwork] as! NetworkServiceProtocol)
+        dataStore = (services[.dataStore] as! DataStoreProtocol)
     }
 }
 
@@ -39,6 +41,8 @@ extension EpisodesInteractor: CharacterDataEmitter, DataEmitter {
 final class EpisodesInteractor {
     var presenter: EpisodesPresenterInput?
     private var networkService: NetworkServiceProtocol?
+    private var dataStore: DataStoreProtocol?
+    
     private var imageCache: NSCache<NSString, UIImage> = {
         let cache = NSCache<NSString, UIImage>()
 //        cache.countLimit = 100
@@ -56,6 +60,17 @@ final class EpisodesInteractor {
 }
 
 extension EpisodesInteractor: EpisodesInteractorInput {
+    func didTapLike(_ request: TapLikeButton.Request) {
+        Task(priority: .userInitiated) {
+            switch request.state {
+            case .selected:
+                dataStore?.save(episode: request.episode)
+            case .normal:
+                dataStore?.deleteEpisode(request.episode.id)
+            }
+        }
+    }
+    
     func didTapCharacter(_ request: TapCharacter.Request) {
         self.selectedCharacter = request.character
         self.selectedItemIndex = request.index
