@@ -12,6 +12,10 @@ protocol CharacterInteractorInput {
     func getCharacter(_ request: GetCharacter.Request)
 }
 
+protocol CharacterDataReceiver: DataReceiver {
+    func receive(_ character: Character)
+}
+
 extension CharacterInteractor: ServiceObtainable {
     var neededServices: [Service] {
         []
@@ -19,17 +23,6 @@ extension CharacterInteractor: ServiceObtainable {
     
     func addServices(_ services: [Service : ServiceProtocol]) {
         
-    }
-}
-
-protocol CharacterDataReceiver: DataReceiver {
-    func receive(_ character: Character)
-}
-extension CharacterInteractor: CharacterDataReceiver {
-    var id: String { "CharacterInteractor" }
-
-    func receive(_ character: Character) {
-        self.character = character
     }
 }
 
@@ -50,4 +43,13 @@ extension CharacterInteractor: CharacterInteractorInput {
         presenter?.presentCharacter(responce)
     }
 }
+
+extension CharacterInteractor: CharacterDataReceiver {
+    var id: String { "CharacterInteractor" }
+
+    func receive(_ character: Character) {
+        self.character = character
+    }
+}
+
 

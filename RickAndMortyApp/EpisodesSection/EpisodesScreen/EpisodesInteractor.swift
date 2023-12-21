@@ -26,14 +26,15 @@ extension EpisodesInteractor: ServiceObtainable {
 }
 
 protocol CharacterDataEmitter {
-    func emit() -> Character
+    func emitCharacter() -> Character
 }
+
 extension EpisodesInteractor: CharacterDataEmitter, DataEmitter {
     var id: String {
         "EpisodesInteractor"
     }
     
-    func emit() -> Character {
+    func emitCharacter() -> Character {
         selectedCharacter
     }
 }
@@ -54,7 +55,28 @@ final class EpisodesInteractor {
     private var nextPage: String?
     private var isLastPage: Bool = false
     
+    @objc private func episodeRemoved(_ notification: NSNotification) {
+        if let episodeID = notification.userInfo?["episode"] as? Int {
+            let responce = DeselectLikeButton.Responce(episodeID: episodeID)
+            presenter?.presentDeselectLikeButton(responce)
+        }
+    }
+    
+    private func addObservers() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(episodeRemoved(_:)),
+                                               name: .removedEpisodeFromFavouritesInFavourites,
+                                               object: nil)
+    }
+    
+    private func removeObservers() {
+        NotificationCenter.default.removeObserver(self,
+                                                  name: .removedEpisodeFromFavouritesInFavourites,
+                                                  object: nil)
+    }
+    
     deinit {
+        removeObservers()
         print("deinit EpisodesInteractor")
     }
 }
@@ -62,12 +84,24 @@ final class EpisodesInteractor {
 extension EpisodesInteractor: EpisodesInteractorInput {
     func didTapLike(_ request: TapLikeButton.Request) {
         Task(priority: .userInitiated) {
+            
+            var episodeInfo: [String: Int] = [:]
+            episodeInfo["episode"] = request.episode.id
+            
             switch request.state {
             case .selected:
                 dataStore?.save(episode: request.episode)
+                NotificationCenter.default.post(name: .addedEpisodeToFavourites, 
+                                                object: nil, 
+                                                userInfo: episodeInfo)
             case .normal:
                 dataStore?.deleteEpisode(request.episode.id)
+                NotificationCenter.default.post(name: .removedEpisodeFromFavouritesInEpisodeList,
+                                                object: nil,
+                                                userInfo: episodeInfo)
             }
+            
+            addObservers()
         }
     }
     
@@ -89,14 +123,17 @@ extension EpisodesInteractor: EpisodesInteractorInput {
             }
             
             let result: Response<NetworkEpisode>? = await networkService?.getPage(pagePath: self.nextPage)
-            guard let episodes = result?.results
+            guard var episodes = result?.results
             else { return }
             
             self.nextPage = result?.info?.next
             self.isLastPage = result?.info?.next == nil
             
+            let episodesFromStore = searchInStore(for: &episodes)
+            
             let characterData = await self.fetchRandomCharactersData(fromEpisodes: episodes)
-            let responce = FetchEpisodes.Response(episodes: episodes,
+            let responce = FetchEpisodes.Response(episodesFoundInStore: episodesFromStore, 
+                                                  episodes: episodes,
                                                   characters: characterData,
                                                   lastPage: self.isLastPage)
             
@@ -104,8 +141,24 @@ extension EpisodesInteractor: EpisodesInteractorInput {
         }
     }
     
+    private func searchInStore(for episodes: inout [NetworkEpisode]) -> [Episode?] {
+//        var notFoundInStore: [NetworkEpisode] = episodes
+        var foundInStore: [Episode?] = Array(repeating: nil, count: episodes.count)
+        
+        episodes.enumerated().forEach { index, netEpisode in
+            if let episode = dataStore?.fetchEpisode(netEpisode.id!) {
+                
+                foundInStore[index] = episode
+                episodes.remove(at: index)
+            }
+        }
+        
+        return foundInStore
+    }
+    
     private func fetchRandomCharactersData(fromEpisodes episodes: [NetworkEpisode]) async -> [CharacterData?] {
         let characters = await withTaskGroup(of: (index: Int, character: CharacterData?).self) { group -> [CharacterData?] in
+            
             for (index, episode) in episodes.enumerated() {
                 guard let numberOfCharacters = episode.characters?.count,
                         numberOfCharacters != 0

@@ -3,7 +3,7 @@
     <entity name="DBCharacter" representedClassName="DBCharacter" syncable="YES">
         <attribute name="gender" attributeType="String"/>
         <attribute name="id" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="image" optional="YES" attributeType="Transformable"/>
+        <attribute name="image" optional="YES" attributeType="String"/>
         <attribute name="location" attributeType="String"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="origin" attributeType="String"/>
@@ -14,7 +14,7 @@
     <entity name="DBEpisode" representedClassName="DBEpisode" syncable="YES">
         <attribute name="episode" attributeType="String"/>
         <attribute name="id" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="isFavourite" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="isFavourite" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>
         <relationship name="character" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DBCharacter"/>
     </entity>

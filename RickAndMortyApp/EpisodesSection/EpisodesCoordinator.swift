@@ -79,16 +79,18 @@ extension EpisodesCoordinator: EpisodesCoordinatorInput {
     }
 }
 
+
+
 extension EpisodesCoordinator {
     func passCharcter(from source: CharacterDataEmitter, to destination: CharacterDataReceiver) {
-        let character = source.emit()
+        let character = source.emitCharacter()
         destination.receive(character)
     }
 }
 
 extension EpisodesCoordinator: EpisodesCoordinatorNavigationInput {
     func willNavigateToEpisodesScreen() {
-        print("will show")
+//        print("will show")
     }
     
     

@@ -18,6 +18,7 @@ final class TabBarController: UITabBarController {
         tabBar.layer.shadowOpacity = 0.17
         
         tabBar.itemPositioning = .centered
+        
        
     }
     

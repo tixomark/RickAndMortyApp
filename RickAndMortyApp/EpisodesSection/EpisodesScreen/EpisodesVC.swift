@@ -10,6 +10,7 @@ import UIKit
 
 protocol EpisodesVCInput: AnyObject {
     func displayFetchedEpisodes(_ viewModel: FetchEpisodes.ViewModel)
+    func displayDeselectLikeButton(_ viewModel: DeselectLikeButton.ViewModel)
 }
 
 final class EpisodesVC: UIViewController {
@@ -109,12 +110,28 @@ extension EpisodesVC: EpisodesVCInput {
         print(startIndex...endIndex)
         self.episodes += viewModel.episodes
 
-        Task(priority: .high) { @MainActor in
+        Task { @MainActor in
             self.collection.insertItems(at: indexesToInsert)
             self.isWaitingForUpdate = false
         }
-        
     }
+    
+    func displayDeselectLikeButton(_ viewModel: DeselectLikeButton.ViewModel) {
+        let episodeID = viewModel.episodeID
+        
+        guard let episodeIndex = episodes.firstIndex(where: { episode in
+            episode.id == episodeID
+        })
+        else { return }
+        
+        let indexPathToUpdate = IndexPath(item: episodeIndex, section: 0)
+        
+        Task { @MainActor in
+            episodes[episodeIndex].isFavourite = false
+            collection.reloadItems(at: [indexPathToUpdate])
+        }
+    }
+    
 }
 
 extension EpisodesVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {

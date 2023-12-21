@@ -41,8 +41,10 @@ final class MainCoordinator: ParentCoordinator {
         rootController = builder.buildMainTabBar([episodesCoordinator.rootController,
                                                   favouritesCoordinator.rootController])
         
+        
         episodesCoordinator.start()
         favouritesCoordinator.start()
+//        rootController.viewControllers?.forEach({ let _ = $0.view})
     }
     
     func childDidFinish(_ child: any ChildCoordinator) {

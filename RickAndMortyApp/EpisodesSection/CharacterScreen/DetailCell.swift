@@ -37,13 +37,11 @@ final class DetailCell: UITableViewCell {
     
     
     private func setUI() {
-        contentView.addSubviews(titleLabel, 
-                                infoLabel)
+        contentView.addSubviews(titleLabel, infoLabel)
     }
     
     private func setConstraints() {
-        UIView.doNotTranslateAutoLayoutIntoConstraints(for: titleLabel,
-                                                       infoLabel)
+        UIView.doNotTranslateAutoLayoutIntoConstraints(for: titleLabel, infoLabel)
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
