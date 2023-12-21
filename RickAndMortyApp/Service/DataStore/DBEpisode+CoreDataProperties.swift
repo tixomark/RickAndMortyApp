@@ -2,7 +2,7 @@
 //  DBEpisode+CoreDataProperties.swift
 //  RickAndMortyApp
 //
-//  Created by Tixon Markin on 20.12.2023.
+//  Created by Tixon Markin on 21.12.2023.
 //
 //
 

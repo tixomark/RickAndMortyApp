@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreData
+import UIKit
 
 @objc(DBCharacter)
 public class DBCharacter: NSManagedObject {
@@ -26,6 +27,7 @@ public class DBCharacter: NSManagedObject {
         self.origin = character.origin
         self.type = character.type
         self.location = character.location
-        self.image = nil
+        self.image = character.image
+        
     }
 }

@@ -12,5 +12,8 @@ final class FavouritesNC: UINavigationController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
+        navigationBar.tintColor = .black
     }
 }

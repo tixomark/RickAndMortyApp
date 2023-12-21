@@ -78,14 +78,22 @@ final class CharacterVC: UIViewController {
         let request = GetCharacter.Request()
         interactor?.getCharacter(request)
     }
-        
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        
         let cornerRadius = imageView.frame.size.height / 2
         imageView.layer.cornerRadius = cornerRadius
     }
     
     private func setUI() {
+        let RMIcon = UIImage(.blackLogo)?.withRenderingMode(.alwaysOriginal)
+        let rightBarButtonItem = UIBarButtonItem(image: RMIcon)
+        rightBarButtonItem.isEnabled = false
+        navigationItem.rightBarButtonItem = rightBarButtonItem
+        navigationItem.leftItemsSupplementBackButton = true
+        
+        
         view.backgroundColor = .RMbackgroundColor
         
         let tapGesture = UITapGestureRecognizer(target: self,
@@ -94,7 +102,7 @@ final class CharacterVC: UIViewController {
         
         characterDetailsTable.dataSource = self
         
-        view.addSubviews(imageView, 
+        view.addSubviews(imageView,
                          cameraIcon,
                          nameLabel,
                          informationLabel,
@@ -145,6 +153,7 @@ extension CharacterVC: CharacterVCInput {
         rowData = viewModel.infoFields
         imageView.image = viewModel.image
         nameLabel.text = viewModel.name
+        
         characterDetailsTable.reloadData()
     }
 }

@@ -63,6 +63,7 @@ struct Character {
                   species: character.species, 
                   origin: character.origin, 
                   type: character.type, 
-                  location: character.location)
+                  location: character.location,
+                  image: character.image)
     }
 }

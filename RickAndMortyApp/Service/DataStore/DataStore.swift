@@ -22,8 +22,6 @@ final class DataStore: ServiceProtocol {
     var description: String = "DataStore service"
     
     private lazy var persistentContainer: NSPersistentContainer = {
-//        UIImageToDataTrasformer.register()
-//        URLToStringTransformer.register()
         let container = NSPersistentContainer(name: "Episode")
         container.loadPersistentStores { description, error in
             if let error = error as NSError? {
@@ -35,37 +33,49 @@ final class DataStore: ServiceProtocol {
         return container
     }()
     
-    private var context: NSManagedObjectContext {
-        self.persistentContainer.viewContext
+    private var context: NSManagedObjectContext!
+    
+    init() {
+        context = self.persistentContainer.viewContext
+        UIImageToStringTrasformer.register()
+        
+        
     }
     
-    private var lock = NSLock()
     private func saveContext() {
-        if context.hasChanges {
+        context.performAndWait {
+            guard self.context.hasChanges
+            else { return }
+            
             do {
-                try context.save()
+                print(Thread.current)
+                try self.context.save()
             } catch {
                 fatalError(error.localizedDescription)
             }
         }
     }
-    
 }
 
 extension DataStore: DataStoreProtocol {
     func save(episode: Episode) {
-        let dbEpisode = DBEpisode(from: episode, 
-                                  toContext: context)
-        context.insert(dbEpisode)
-        saveContext()
+        context.performAndWait {
+            let dbEpisode = DBEpisode(from: episode,
+                                      toContext: self.context)
+            self.context.insert(dbEpisode)
+            self.saveContext()
+            
+        }
     }
     
     func deleteEpisode(_ id: Int) {
-        guard let episode = fetchDBEpisode(id)
-        else { return }
-        
-        context.delete(episode)
-        saveContext()
+        context.performAndWait {
+            guard let episode = self.fetchDBEpisode(id)
+            else { return }
+            
+            self.context.delete(episode)
+            self.saveContext()
+        }
     }
     
     private func fetchDBEpisode(_ id: Int) -> DBEpisode? {
@@ -80,26 +90,22 @@ extension DataStore: DataStoreProtocol {
     }
     
     func fetchEpisode(_ id: Int) -> Episode? {
-        let request = DBEpisode.fetchRequest()
-        request.includesSubentities = true
-        request.predicate = NSPredicate(format: "id LIKE %@", "\(id)")
+        guard let dbEpisode = fetchDBEpisode(id)
+        else { return nil }
         
-        guard let episode = try? context.fetch(request).first
-        else  { return nil }
-            
-        return Episode(from: episode)
+        return Episode(from: dbEpisode)
     }
     
     func fetchEpisodes() -> [Episode] {
-        let request = DBEpisode.fetchRequest()
-        request.includesSubentities = true
-        
-        let episodes = try? context.fetch(request)
-        
-        let result = episodes?.compactMap { episode in
-            Episode(from: episode)
-        }
-        
-        return result ?? []
+            let request = DBEpisode.fetchRequest()
+            request.includesSubentities = true
+            
+            let episodes = try? context.fetch(request)
+            
+            let result = episodes?.compactMap { episode in
+                Episode(from: episode)
+            }
+            
+            return result ?? []
     }
 }

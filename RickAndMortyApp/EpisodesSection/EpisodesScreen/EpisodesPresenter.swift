@@ -34,11 +34,6 @@ extension EpisodesPresenter: EpisodesPresenterInput {
         
         let episodes = episodesFromStore.map { episode in
             episode == nil ? episodesFromNet.removeFirst() : episode!
-//            if episode == nil {
-//                episodesFromNet.removeFirst()
-//            } else {
-//                episode!
-//            }
         }
         
         let viewModel = FetchEpisodes.ViewModel(episodes: episodes,

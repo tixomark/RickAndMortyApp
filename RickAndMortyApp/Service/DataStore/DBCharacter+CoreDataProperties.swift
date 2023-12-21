@@ -2,12 +2,13 @@
 //  DBCharacter+CoreDataProperties.swift
 //  RickAndMortyApp
 //
-//  Created by Tixon Markin on 20.12.2023.
+//  Created by Tixon Markin on 21.12.2023.
 //
 //
 
 import Foundation
 import CoreData
+import UIKit
 
 
 extension DBCharacter {
@@ -24,7 +25,7 @@ extension DBCharacter {
     @NSManaged public var origin: String
     @NSManaged public var type: String
     @NSManaged public var location: String
-    @NSManaged public var image: String?
+    @NSManaged public var image: UIImage?
 
 }
 

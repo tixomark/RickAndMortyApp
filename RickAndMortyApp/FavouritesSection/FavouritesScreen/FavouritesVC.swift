@@ -66,6 +66,11 @@ final class FavouritesVC: UIViewController {
     }
     
     private func setUI() {
+        navigationItem.backBarButtonItem = UIBarButtonItem(image: UIImage(.goBackIcon),
+                                                           style: .plain,
+                                                           target: nil,
+                                                           action: nil)
+        
         self.view.backgroundColor = .RMbackgroundColor
         
         let estimatedCellSize: CGSize = .init(width: view.bounds.width - 48,
@@ -79,7 +84,7 @@ final class FavouritesVC: UIViewController {
     private func setConstraints() {
         UIView.doNotTranslateAutoLayoutIntoConstraints(for: header, collection)
         NSLayoutConstraint.activate([
-            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -25),
+            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
             header.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             collection.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 29),

@@ -15,6 +15,8 @@ enum ImageName: String {
     case homeIconSelected
     case favouritesIconSelected
     case favouritesIconNormal
+    case arrowBackIcon
+    case goBackIcon
     
     case blackLogo
     case header

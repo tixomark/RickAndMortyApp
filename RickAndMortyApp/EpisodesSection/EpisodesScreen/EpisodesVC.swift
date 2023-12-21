@@ -60,12 +60,20 @@ final class EpisodesVC: UIViewController {
         collection.register(EpisodeCell.self,
                             forCellWithReuseIdentifier: EpisodeCell.description())
         
-        
         let request = FetchEpisodes.Request()
         interactor?.fetchEpisodes(request)
     }
     
     private func setUI() {
+//        let backImage = UIImage(.arrowBackIcon)
+//        self.navigationController?.navigationBar.backIndicatorImage = backImage
+//        self.navigationController?.navigationBar.backIndicatorTransitionMaskImage = backImage
+        
+        navigationItem.backBarButtonItem = UIBarButtonItem(image: UIImage(.goBackIcon),
+                                                           style: .plain,
+                                                           target: nil,
+                                                           action: nil)
+        
         self.view.backgroundColor = .RMbackgroundColor
         
         let estimatedCellSize: CGSize = .init(width: view.bounds.width - 48,
