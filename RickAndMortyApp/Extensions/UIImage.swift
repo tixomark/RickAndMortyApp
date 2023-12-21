@@ -11,12 +11,11 @@ import UIKit
 enum ImageName: String {
     case monitorIcon
     case cameraIcon
-    case homeIconNormal
-    case homeIconSelected
-    case favouritesIconSelected
-    case favouritesIconNormal
+    case homeIconNormal,homeIconSelected
+    case favouritesIconSelected, favouritesIconNormal
     case arrowBackIcon
     case goBackIcon
+    case likedIcon, unlikedIcon
     
     case blackLogo
     case header

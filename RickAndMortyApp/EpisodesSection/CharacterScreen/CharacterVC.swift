@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import PhotosUI
 
 protocol CharacterVCInput: AnyObject {
     func displayCharacter(_ viewModel: GetCharacter.ViewModel)
@@ -140,7 +141,90 @@ final class CharacterVC: UIViewController {
     }
     
     @objc private func didTapCameraIcon() {
-        print("did ta camra icon")
+        let title = "Загрузите изображение"
+        let alert = UIAlertController(title: title,
+                                      message: nil,
+                                      preferredStyle: .actionSheet)
+        let cancelAction = UIAlertAction(title: "Отмена",
+                                         style: .cancel)
+        let galleryAction = UIAlertAction(title: "Галерея",
+                                          style: .default) { _ in self.galleryAction() }
+        let cameraAction = UIAlertAction(title: "Камера",
+                                         style: .default) { _ in self.showCamera() }
+
+        alert.addAction(cancelAction)
+        alert.addAction(galleryAction)
+        alert.addAction(cameraAction)
+        present(alert, animated: true)
+    }
+    
+    private func galleryAction() {
+        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+            switch status {
+            case .notDetermined:
+                print(status)
+            case .restricted:
+                print(status)
+            case .denied:
+                let title = "Разрешить доступ к «Фото»?"
+                let message = "Это необходимо для добавления ваших фотографий"
+                self.showAllowmentAlert(title: title,
+                                        message: message) {
+                    self.goToApplicationSettings()
+                }
+            case .authorized, .limited:
+                self.showImagePicker()
+            @unknown default:
+                print(status)
+            }
+        }
+    }
+    
+    private func showAllowmentAlert(title: String, message: String, completion: @escaping () -> ()) {
+        DispatchQueue.main.async {
+            let alert = UIAlertController(title: title,
+                                          message: message,
+                                          preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: "Отменить",
+                                             style: .cancel)
+            let allowAction = UIAlertAction(title: "Разрешить",
+                                            style: .default) { _ in
+                completion()
+            }
+           
+            alert.addAction(cancelAction)
+            alert.addAction(allowAction)
+            self.present(alert, animated: true)
+        }
+    }
+    
+    private func goToApplicationSettings() {
+            guard let url = URL(string: UIApplication.openSettingsURLString),
+                    UIApplication.shared.canOpenURL(url)
+            else {
+                assertionFailure("Not able to open App privacy settings")
+                return
+            }
+        DispatchQueue.main.async {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    private func showImagePicker() {
+        DispatchQueue.main.async {
+            var config = PHPickerConfiguration(photoLibrary: .shared())
+            config.filter = .images
+            config.selectionLimit = 1
+            
+            let picker = PHPickerViewController(configuration: config)
+            picker.delegate = self
+            
+            self.present(picker, animated: true)
+        }
+    }
+    
+    private func showCamera() {
+        
     }
     
     deinit {
@@ -170,9 +254,26 @@ extension CharacterVC: UITableViewDataSource {
         let title = rowTitles[index]
         let info = rowData[index]
         
-        cell.configure(title: title,
-                       info: info)
+        cell.configure(title: title, info: info)
         
         return cell
     }
 }
+
+extension CharacterVC: PHPickerViewControllerDelegate {
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        
+        results.first?.itemProvider.loadObject(ofClass: UIImage.self) { object, error in
+            if let image = object as? UIImage {
+                DispatchQueue.main.async {
+                    self.imageView.image = image
+                    
+                    picker.dismiss(animated: true)
+                }
+            }
+        }
+    }
+    
+    
+}
+

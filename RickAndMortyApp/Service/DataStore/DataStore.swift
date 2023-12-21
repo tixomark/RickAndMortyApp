@@ -22,24 +22,20 @@ final class DataStore: ServiceProtocol {
     var description: String = "DataStore service"
     
     private lazy var persistentContainer: NSPersistentContainer = {
+        UIImageToStringTrasformer.register()
         let container = NSPersistentContainer(name: "Episode")
         container.loadPersistentStores { description, error in
             if let error = error as NSError? {
                 print("Unresolved error \(error), \(error.userInfo)")
             } else {
-                print(description.url ?? "")
+//                print(description.url ?? "")
             }
         }
         return container
     }()
     
-    private var context: NSManagedObjectContext!
-    
-    init() {
-        context = self.persistentContainer.viewContext
-        UIImageToStringTrasformer.register()
-        
-        
+    private var context: NSManagedObjectContext {
+        self.persistentContainer.viewContext
     }
     
     private func saveContext() {
@@ -48,7 +44,6 @@ final class DataStore: ServiceProtocol {
             else { return }
             
             do {
-                print(Thread.current)
                 try self.context.save()
             } catch {
                 fatalError(error.localizedDescription)
@@ -64,7 +59,6 @@ extension DataStore: DataStoreProtocol {
                                       toContext: self.context)
             self.context.insert(dbEpisode)
             self.saveContext()
-            
         }
     }
     
@@ -97,15 +91,15 @@ extension DataStore: DataStoreProtocol {
     }
     
     func fetchEpisodes() -> [Episode] {
-            let request = DBEpisode.fetchRequest()
-            request.includesSubentities = true
-            
-            let episodes = try? context.fetch(request)
-            
-            let result = episodes?.compactMap { episode in
-                Episode(from: episode)
-            }
-            
-            return result ?? []
+        let request = DBEpisode.fetchRequest()
+        request.includesSubentities = true
+        
+        let episodes = try? context.fetch(request)
+        
+        let result = episodes?.compactMap { episode in
+            Episode(from: episode)
+        }
+        
+        return result ?? []
     }
 }
