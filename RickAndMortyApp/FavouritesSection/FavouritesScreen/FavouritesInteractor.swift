@@ -11,6 +11,7 @@ import UIKit
 protocol FavouritesInteractorInput {
     func fetchFavouriteEpisodes(_ request: FetchFavouriteEpisodes.Request)
     func deleteEpisode(_ request: DeleteEpisode.Request)
+    func didTapCharacter(_ request: FavouritesTapCharacter.Request)
 }
 
 extension FavouritesInteractor: ServiceObtainable {
@@ -23,9 +24,27 @@ extension FavouritesInteractor: ServiceObtainable {
     }
 }
 
+//protocol CharacterDataEmitter {
+//    func emitCharacter() -> Character
+//}
+
+extension FavouritesInteractor: CharacterDataEmitter, DataEmitter {
+    var id: String {
+        "EpisodesInteractor"
+    }
+    
+    func emitCharacter() -> Character {
+        selectedCharacter
+    }
+}
+
+
 final class FavouritesInteractor {
     var presenter: FavouritesPresenterInput?
     private var dataStore: DataStoreProtocol?
+    
+    private var selectedItemIndex: Int!
+    private var selectedCharacter: Character!
     
     @objc private func addEpisode(_ notification: NSNotification) {
         guard let episodeID = notification.userInfo?["episode"] as? Int,
@@ -39,11 +58,8 @@ final class FavouritesInteractor {
     
     @objc private func removeEpisode(_ notification: NSNotification) {
         if let episodeID = notification.userInfo?["episode"] as? Int {
-            
             let responce = DeleteEpisode.Responce(id: episodeID)
             presenter?.deleteEpisode(responce)
-            
-            
         }
     }
     
@@ -99,6 +115,11 @@ extension FavouritesInteractor: FavouritesInteractorInput {
                                             object: nil,
                                             userInfo: episodeInfo)
         }
+    }
+    
+    func didTapCharacter(_ request: FavouritesTapCharacter.Request) {
+        self.selectedCharacter = request.character
+        self.selectedItemIndex = request.index
     }
 }
 

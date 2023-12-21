@@ -164,7 +164,8 @@ extension FavouritesVC: EpisodeCellDelegate {
               let character = episodes[index].character
         else { return }
         
-        let request = TapCharacter.Request(character: character, index: index)
+        let request = FavouritesTapCharacter.Request(character: character, index: index)
+        interactor?.didTapCharacter(request)
         
         coordinator?.showCharacterScreen()
     }

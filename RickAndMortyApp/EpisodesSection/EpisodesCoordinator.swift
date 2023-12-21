@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-protocol EpisodesCoordinatorInput: AnyObject {
+protocol EpisodesCoordinatorInput: AnyObject, ShowCharacterScreenCoordinatorInput {
     func showCharacterScreen()
 }
 
@@ -48,11 +48,9 @@ final class EpisodesCoordinator: ChildCoordinator {
         }
         
         episodesVC.coordinator = self
-        
         let interactor = episodesVC.interactor as! DataEmitter
         dataPasser?.addEntity(.emitter(interactor,
                                        id: "EpisodesInteractor"))
-        
         rootController.viewControllers = [episodesVC]
     }
     

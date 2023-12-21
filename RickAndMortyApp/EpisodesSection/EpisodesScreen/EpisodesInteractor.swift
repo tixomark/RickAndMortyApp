@@ -142,7 +142,6 @@ extension EpisodesInteractor: EpisodesInteractorInput {
     }
     
     private func searchInStore(for episodes: inout [NetworkEpisode]) -> [Episode?] {
-//        var notFoundInStore: [NetworkEpisode] = episodes
         var foundInStore: [Episode?] = Array(repeating: nil, count: episodes.count)
         
         episodes.enumerated().forEach { index, netEpisode in

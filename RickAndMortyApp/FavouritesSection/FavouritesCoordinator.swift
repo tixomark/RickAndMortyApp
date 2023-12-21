@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-protocol FavouritesCoordinatorInput: AnyObject {
+protocol FavouritesCoordinatorInput: AnyObject, ShowCharacterScreenCoordinatorInput {
     func showCharacterScreen()
 }
 
@@ -41,17 +41,36 @@ final class FavouritesCoordinator: ChildCoordinator {
             return
         }
         
-        favouritesVC.coordinator = self
+        let interactor = favouritesVC.interactor as! DataEmitter
+        dataPasser?.addEntity(.emitter(interactor,
+                                       id: "FavouritesInteractor"))
         
-//        rootController.viewControllers =
+        favouritesVC.coordinator = self
         rootController.setViewControllers([favouritesVC], animated: true)
     }
-    
-    
 }
 
 extension FavouritesCoordinator: FavouritesCoordinatorInput {
     func showCharacterScreen() {
+        guard let characterVC: CharacterVC = builder?.buildScreen(.characterDetail)
+        else {
+            print("EpisodesCoordinator: can not showCharacterModule")
+            return
+        }
         
+        guard let emitter = dataPasser?.getEmitter("FavouritesInteractor") as? CharacterDataEmitter,
+                let receiver = characterVC.interactor as? CharacterDataReceiver
+        else { return }
+        
+        characterVC.coordinator = self
+        passCharcter(from: emitter, to: receiver)
+        rootController.pushViewController(characterVC, animated: true)
+    }
+}
+
+extension FavouritesCoordinator {
+    func passCharcter(from source: CharacterDataEmitter, to destination: CharacterDataReceiver) {
+        let character = source.emitCharacter()
+        destination.receive(character)
     }
 }

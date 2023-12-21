@@ -59,7 +59,7 @@ final class CharacterVC: UIViewController {
     }()
     
     var interactor: CharacterInteractorInput?
-    weak var coordinator: EpisodesCoordinatorInput?
+    weak var coordinator: ShowCharacterScreenCoordinatorInput?
     
     private var rowData = [String]()
     private var rowTitles = ["Gender",
@@ -165,6 +165,5 @@ extension CharacterVC: UITableViewDataSource {
                        info: info)
         
         return cell
-        
     }
 }

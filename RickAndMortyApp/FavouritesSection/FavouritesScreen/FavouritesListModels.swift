@@ -11,6 +11,7 @@ import UIKit
 typealias FetchFavouriteEpisodes = FavouritesList.FetchFavouriteEpisodes
 typealias DeleteEpisode = FavouritesList.DeleteEpisode
 typealias AddEpisode = FavouritesList.AddEpisode
+typealias FavouritesTapCharacter = FavouritesList.TapCharacter
 
 enum FavouritesList {
     enum FetchFavouriteEpisodes {
@@ -44,5 +45,12 @@ enum FavouritesList {
             var episode: Episode
         }
         
+    }
+    
+    enum TapCharacter {
+        struct Request {
+            var character: Character
+            var index: Int
+        }
     }
 }

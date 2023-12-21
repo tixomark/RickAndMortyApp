@@ -28,17 +28,17 @@ extension EpisodesPresenter: EpisodesPresenterInput {
     }
     
     func presentFetchedEpisodes(_ responce: FetchEpisodes.Response) {
-        
         var episodesFromNet = createEpisodesByMerging(netEpisodes: responce.episodes,
                                                       characters: responce.characters)
         let episodesFromStore = responce.episodesFoundInStore
         
         let episodes = episodesFromStore.map { episode in
-            if episode == nil {
-                episodesFromNet.removeFirst()
-            } else {
-                episode!
-            }
+            episode == nil ? episodesFromNet.removeFirst() : episode!
+//            if episode == nil {
+//                episodesFromNet.removeFirst()
+//            } else {
+//                episode!
+//            }
         }
         
         let viewModel = FetchEpisodes.ViewModel(episodes: episodes,
