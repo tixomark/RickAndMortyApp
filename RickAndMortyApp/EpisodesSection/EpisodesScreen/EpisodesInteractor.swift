@@ -171,8 +171,8 @@ extension EpisodesInteractor: EpisodesInteractorInput {
     private func searchInStore(for episodes: inout [NetworkEpisode]) -> [Episode?] {
         var foundInStore: [Episode?] = Array(repeating: nil, count: episodes.count)
         
-        episodes.enumerated().forEach { index, netEpisode in
-            if let episode = dataStore?.fetchEpisode(netEpisode.id!) {
+        for index in (0..<episodes.count).reversed() {
+            if let episode = dataStore?.fetchEpisode(episodes[index].id!) {
                 
                 foundInStore[index] = episode
                 episodes.remove(at: index)

@@ -146,7 +146,7 @@ extension EpisodesVC: EpisodesVCInput {
             var snapshot = NSDiffableDataSourceSnapshot<EpisodesSection, Episode>()
             snapshot.appendSections([.first])
             snapshot.appendItems(episodes, toSection: .first)
-            snapshot.reloadItems([episodes[0], episodes[1]])
+            snapshot.reloadItems(episodes)
             
             dataSource.apply(snapshot, animatingDifferences: true)
             collection.setContentOffset(.zero, animated: true)

@@ -100,7 +100,7 @@ final class FavouritesVC: UIViewController {
 extension FavouritesVC: FavouritesVCInput {
     func displayEpisodes(_ viewModel: FetchFavouriteEpisodes.ViewModel) {
         Task { @MainActor in
-            self.episodes += viewModel.episodes
+            self.episodes = viewModel.episodes
             
             var snapshot = NSDiffableDataSourceSnapshot<FavouritesSection, Episode>()
             snapshot.appendSections([.first])
