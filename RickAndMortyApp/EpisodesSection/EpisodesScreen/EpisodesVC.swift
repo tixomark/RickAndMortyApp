@@ -10,6 +10,7 @@ import UIKit
 
 protocol EpisodesVCInput: AnyObject {
     func displayFetchedEpisodes(_ viewModel: FetchEpisodes.ViewModel)
+    func displayQueriedEpisodes(_ viewModel: QueryEpisodes.ViewModel)
     func displayDeselectLikeButton(_ viewModel: DeselectLikeButton.ViewModel)
 }
 
@@ -53,14 +54,16 @@ final class EpisodesVC: UIViewController {
     
     var interactor: EpisodesInteractorInput?
     weak var coordinator: EpisodesCoordinatorInput?
-
+    
+    private lazy var dataSource: EpisodesDataSource = createDataSource()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setUI()
         setConstraints()
-        collection.dataSource = self
         collection.delegate = self
+        collection.dataSource = dataSource
         collection.register(EpisodeCell.self,
                             forCellWithReuseIdentifier: EpisodeCell.description())
         
@@ -136,59 +139,73 @@ final class EpisodesVC: UIViewController {
 }
 
 extension EpisodesVC: EpisodesVCInput {
-    func displayFetchedEpisodes(_ viewModel: FetchEpisodes.ViewModel) {
-        self.isLastPageReached = viewModel.lastPage
-        
-        let startIndex = self.episodes.count
-        let endIndex = startIndex + viewModel.episodes.count - 1
-        
-        var indexesToInsert = [IndexPath]()
-        for index in startIndex...endIndex {
-            indexesToInsert.append(IndexPath(item: index, section: 0))
-        }
-        
-        
-            self.episodes += viewModel.episodes
-        
-
+    func displayQueriedEpisodes(_ viewModel: QueryEpisodes.ViewModel) {
         Task { @MainActor in
-            self.collection.insertItems(at: indexesToInsert)
+        self.isLastPageReached = viewModel.lastPage
+            self.episodes = viewModel.episodes
+            var snapshot = NSDiffableDataSourceSnapshot<EpisodesSection, Episode>()
+            snapshot.appendSections([.first])
+            snapshot.appendItems(episodes, toSection: .first)
+            snapshot.reloadItems([episodes[0], episodes[1]])
+            
+            dataSource.apply(snapshot, animatingDifferences: true)
+            collection.setContentOffset(.zero, animated: true)
+        }
+    }
+    
+    func displayFetchedEpisodes(_ viewModel: FetchEpisodes.ViewModel) {
+        Task { @MainActor in
+        self.isLastPageReached = viewModel.lastPage
+            self.episodes += viewModel.episodes
+            var snapshot = NSDiffableDataSourceSnapshot<EpisodesSection, Episode>()
+            snapshot.appendSections([.first])
+            snapshot.appendItems(episodes, toSection: .first)
+            dataSource.apply(snapshot, animatingDifferences: true)
             self.isWaitingForUpdate = false
         }
     }
     
     func displayDeselectLikeButton(_ viewModel: DeselectLikeButton.ViewModel) {
-        let episodeID = viewModel.episodeID
-        
-        guard let episodeIndex = episodes.firstIndex(where: { episode in
-            episode.id == episodeID
-        })
-        else { return }
-        
-        let indexPathToUpdate = IndexPath(item: episodeIndex, section: 0)
-        
         Task { @MainActor in
+            let episodeID = viewModel.episodeID
+            
+            let episodeIndex = episodes.firstIndex { episode in
+                episode.id == episodeID
+            }
+            guard let episodeIndex else { return }
+            
             episodes[episodeIndex].isFavourite = false
-            collection.reloadItems(at: [indexPathToUpdate])
+            
+            var snapshot = dataSource.snapshot()
+            snapshot.reloadItems([episodes[episodeIndex]])
+            dataSource.apply(snapshot, animatingDifferences: false)
         }
     }
     
 }
-
-extension EpisodesVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        episodes.count
+// MARK: Diffable Datasource methods
+extension EpisodesVC {
+    enum EpisodesSection {
+        case first
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EpisodeCell.description(), for: indexPath) as! EpisodeCell
-        
-        cell.configure(using: episodes[indexPath.item])
-        cell.delegate = self
-        
-        return cell
+    typealias EpisodesDataSource = UICollectionViewDiffableDataSource<EpisodesSection, Episode>
+    
+    private func createDataSource() -> EpisodesDataSource {
+        let dataSource = EpisodesDataSource(collectionView: collection) { collectionView, indexPath, itemIdentifier in
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EpisodeCell.description(),
+                                                          for: indexPath) as! EpisodeCell
+            
+            cell.configure(using: self.episodes[indexPath.item])
+            cell.delegate = self
+            
+            return cell
+        }
+        return dataSource
     }
-   
+}
+
+extension EpisodesVC: UICollectionViewDelegateFlowLayout {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard !isWaitingForUpdate && !isLastPageReached
         else { return }
@@ -231,11 +248,7 @@ extension EpisodesVC: EpisodeCellDelegate {
 
 extension EpisodesVC: SearchViewDelegate {
     func textDidChangeIn(_ searchView: SearchView, toValue text: String) {
-        guard text != ""
-        else { return }
-        
-//
-//        let request = QueryEpisodes.Request(type: filterType, query: text)
-//        interactor?.queryEpisodes(request)
+        let request = QueryEpisodes.Request(type: filterType, query: text)
+        interactor?.queryEpisodes(request)
     }
 }

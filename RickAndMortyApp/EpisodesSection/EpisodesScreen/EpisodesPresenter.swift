@@ -10,6 +10,7 @@ import UIKit
 
 protocol EpisodesPresenterInput {
     func presentFetchedEpisodes(_ responce: FetchEpisodes.Response)
+    func presentQueriedEpisodes(_ responce: QueryEpisodes.Response)
     func presentDeselectLikeButton(_ responce: DeselectLikeButton.Responce)
 }
 
@@ -22,9 +23,24 @@ final class EpisodesPresenter {
 }
 
 extension EpisodesPresenter: EpisodesPresenterInput {
+    
     func presentDeselectLikeButton(_ responce: DeselectLikeButton.Responce) {
         let viewModel = DeselectLikeButton.ViewModel(episodeID: responce.episodeID)
         view?.displayDeselectLikeButton(viewModel)
+    }
+    
+    func presentQueriedEpisodes(_ responce: QueryEpisodes.Response) {
+        var episodesFromNet = createEpisodesByMerging(netEpisodes: responce.episodes,
+                                                      characters: responce.characters)
+        let episodesFromStore = responce.episodesFoundInStore
+        
+        let episodes = episodesFromStore.map { episode in
+            episode == nil ? episodesFromNet.removeFirst() : episode!
+        }
+        
+        let viewModel = QueryEpisodes.ViewModel(episodes: episodes,
+                                                lastPage: responce.lastPage)
+        view?.displayQueriedEpisodes(viewModel)
     }
     
     func presentFetchedEpisodes(_ responce: FetchEpisodes.Response) {

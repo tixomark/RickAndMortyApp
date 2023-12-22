@@ -116,7 +116,7 @@ extension EpisodesInteractor: EpisodesInteractorInput {
     private typealias CharacterData = (image: UIImage?, character: NetworkCharacter)
     
     func fetchEpisodes(_ request: FetchEpisodes.Request) {
-        searchTask = Task(priority: .userInitiated) { () -> () in
+        Task(priority: .userInitiated) { () -> () in
             if request.nextPage == false {
                 self.nextPage = nil
                 self.isLastPage = false
@@ -126,7 +126,7 @@ extension EpisodesInteractor: EpisodesInteractorInput {
             }
             
             let result: Response<NetworkEpisode>? = await networkService?.getPage(pagePath: self.nextPage)
-            await handleResult(result)
+            await handleResult(result, asQuery: false)
         }
     }
     
@@ -135,11 +135,11 @@ extension EpisodesInteractor: EpisodesInteractorInput {
         searchTask = Task(priority: .userInitiated) {
             let result: Response<NetworkEpisode>? = await networkService?.getEpisodesPageByQuery(request.query,
                                                                                                  queryType: request.type)
-            await handleResult(result)
+            await handleResult(result, asQuery: true)
         }
     }
     
-    private func handleResult(_ result: Response<NetworkEpisode>?) async {
+    private func handleResult(_ result: Response<NetworkEpisode>?, asQuery: Bool) async {
         guard var episodes = result?.results
         else { return }
         
@@ -149,12 +149,22 @@ extension EpisodesInteractor: EpisodesInteractorInput {
         let episodesFromStore = searchInStore(for: &episodes)
         
         let characterData = await self.fetchRandomCharactersData(fromEpisodes: episodes)
-        let responce = FetchEpisodes.Response(episodesFoundInStore: episodesFromStore,
-                                              episodes: episodes,
-                                              characters: characterData,
-                                              lastPage: self.isLastPage)
         
-        presenter?.presentFetchedEpisodes(responce)
+        
+        switch asQuery {
+        case true:
+            let responce = QueryEpisodes.Response(episodesFoundInStore: episodesFromStore,
+                                                  episodes: episodes,
+                                                  characters: characterData,
+                                                  lastPage: self.isLastPage)
+            presenter?.presentQueriedEpisodes(responce)
+        case false:
+            let responce = FetchEpisodes.Response(episodesFoundInStore: episodesFromStore,
+                                                  episodes: episodes,
+                                                  characters: characterData,
+                                                  lastPage: self.isLastPage)
+            presenter?.presentFetchedEpisodes(responce)
+        }
     }
     
     

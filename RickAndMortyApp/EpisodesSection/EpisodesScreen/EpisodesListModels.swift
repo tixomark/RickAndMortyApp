@@ -38,6 +38,18 @@ enum EpisodesList {
             var type: NetworkService.QueryType
             var query: String
         }
+        struct Response {
+            var episodesFoundInStore: [Episode?]
+            var episodes: [NetworkEpisode]
+            var characters: [(image: UIImage?,
+                              character: NetworkCharacter)?]
+            var lastPage: Bool
+            
+        }
+        struct ViewModel {
+            var episodes: [Episode]
+            var lastPage: Bool
+        }
     }
     
     enum TapCharacter {

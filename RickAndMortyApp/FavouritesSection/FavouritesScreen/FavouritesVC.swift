@@ -49,15 +49,15 @@ final class FavouritesVC: UIViewController {
     var interactor: FavouritesInteractorInput?
     weak var coordinator: FavouritesCoordinatorInput?
     
+    private lazy var dataSource: FavouritesDataSource = createDataSource()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setUI()
         setConstraints()
         
-        collection.dataSource = self
-        collection.delegate = self
-        
+        collection.dataSource = dataSource
         collection.register(EpisodeCell.self,
                             forCellWithReuseIdentifier: EpisodeCell.description())
         
@@ -101,7 +101,11 @@ extension FavouritesVC: FavouritesVCInput {
     func displayEpisodes(_ viewModel: FetchFavouriteEpisodes.ViewModel) {
         Task { @MainActor in
             self.episodes += viewModel.episodes
-            collection.reloadData()
+            
+            var snapshot = NSDiffableDataSourceSnapshot<FavouritesSection, Episode>()
+            snapshot.appendSections([.first])
+            snapshot.appendItems(episodes, toSection: .first)
+            dataSource.apply(snapshot, animatingDifferences: true)
         }
     }
     
@@ -112,41 +116,43 @@ extension FavouritesVC: FavouritesVCInput {
             }
             
             guard let deletionIndex else { return }
-            episodes.remove(at: deletionIndex)
+            let episodeToDelete = episodes.remove(at: deletionIndex)
             
-            let deletionIndexPath = IndexPath(item: deletionIndex, section: 0)
-            collection.deleteItems(at: [deletionIndexPath])
+            var snapshot = dataSource.snapshot()
+            snapshot.deleteItems([episodeToDelete])
+            dataSource.apply(snapshot, animatingDifferences: true)
         }
     }
     
     func addEpisode(_ viewModel: AddEpisode.ViewModel) {
         Task { @MainActor in
             episodes.append(viewModel.episode)
-            
-            let insertionIndex = episodes.firstIndex { episode in
-                episode.id == viewModel.episode.id
-            }
-            
-            guard let insertionIndex else { return }
-            
-            let insertionIndexPath = IndexPath(item: insertionIndex, section: 0)
-            collection.insertItems(at: [insertionIndexPath])
+            var snapshot = dataSource.snapshot()
+            snapshot.appendItems([viewModel.episode], toSection: .first)
+            dataSource.apply(snapshot, animatingDifferences: false)
         }
     }
 }
 
-extension FavouritesVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return episodes.count
+// MARK: Diffable Datasource methods
+extension FavouritesVC {
+    enum FavouritesSection {
+        case first
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EpisodeCell.description(), for: indexPath) as! EpisodeCell
-        
-        cell.configure(using: episodes[indexPath.item])
-        cell.delegate = self
-        
-        return cell
+    typealias FavouritesDataSource = UICollectionViewDiffableDataSource<FavouritesSection, Episode>
+    
+    private func createDataSource() -> FavouritesDataSource {
+        let dataSource = FavouritesDataSource(collectionView: collection) { collectionView, indexPath, itemIdentifier in
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EpisodeCell.description(),
+                                                          for: indexPath) as! EpisodeCell
+            
+            cell.configure(using: self.episodes[indexPath.item])
+            cell.delegate = self
+            
+            return cell
+        }
+        return dataSource
     }
 }
 
