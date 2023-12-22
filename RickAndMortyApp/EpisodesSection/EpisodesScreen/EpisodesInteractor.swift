@@ -10,6 +10,7 @@ import UIKit
 
 protocol EpisodesInteractorInput {
     func fetchEpisodes(_ request: FetchEpisodes.Request)
+    func queryEpisodes(_ request: QueryEpisodes.Request)
     func didTapLike(_ request: TapLikeButton.Request)
     func didTapCharacter(_ request: TapCharacter.Request)
 }
@@ -54,6 +55,8 @@ final class EpisodesInteractor {
     private var selectedCharacter: Character!
     private var nextPage: String?
     private var isLastPage: Bool = false
+    
+    private var searchTask: Task<Void, Never>?
     
     @objc private func episodeRemoved(_ notification: NSNotification) {
         if let episodeID = notification.userInfo?["episode"] as? Int {
@@ -113,7 +116,7 @@ extension EpisodesInteractor: EpisodesInteractorInput {
     private typealias CharacterData = (image: UIImage?, character: NetworkCharacter)
     
     func fetchEpisodes(_ request: FetchEpisodes.Request) {
-        Task(priority: .userInitiated) { () -> () in
+        searchTask = Task(priority: .userInitiated) { () -> () in
             if request.nextPage == false {
                 self.nextPage = nil
                 self.isLastPage = false
@@ -123,23 +126,37 @@ extension EpisodesInteractor: EpisodesInteractorInput {
             }
             
             let result: Response<NetworkEpisode>? = await networkService?.getPage(pagePath: self.nextPage)
-            guard var episodes = result?.results
-            else { return }
-            
-            self.nextPage = result?.info?.next
-            self.isLastPage = result?.info?.next == nil
-            
-            let episodesFromStore = searchInStore(for: &episodes)
-            
-            let characterData = await self.fetchRandomCharactersData(fromEpisodes: episodes)
-            let responce = FetchEpisodes.Response(episodesFoundInStore: episodesFromStore, 
-                                                  episodes: episodes,
-                                                  characters: characterData,
-                                                  lastPage: self.isLastPage)
-            
-            presenter?.presentFetchedEpisodes(responce)
+            await handleResult(result)
         }
     }
+    
+    func queryEpisodes(_ request: QueryEpisodes.Request) {
+        searchTask?.cancel()
+        searchTask = Task(priority: .userInitiated) {
+            let result: Response<NetworkEpisode>? = await networkService?.getEpisodesPageByQuery(request.query,
+                                                                                                 queryType: request.type)
+            await handleResult(result)
+        }
+    }
+    
+    private func handleResult(_ result: Response<NetworkEpisode>?) async {
+        guard var episodes = result?.results
+        else { return }
+        
+        self.nextPage = result?.info?.next
+        self.isLastPage = result?.info?.next == nil
+        
+        let episodesFromStore = searchInStore(for: &episodes)
+        
+        let characterData = await self.fetchRandomCharactersData(fromEpisodes: episodes)
+        let responce = FetchEpisodes.Response(episodesFoundInStore: episodesFromStore,
+                                              episodes: episodes,
+                                              characters: characterData,
+                                              lastPage: self.isLastPage)
+        
+        presenter?.presentFetchedEpisodes(responce)
+    }
+    
     
     private func searchInStore(for episodes: inout [NetworkEpisode]) -> [Episode?] {
         var foundInStore: [Episode?] = Array(repeating: nil, count: episodes.count)

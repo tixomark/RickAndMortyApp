@@ -30,6 +30,7 @@ class LikeView: UIView {
     
     convenience init() {
         self.init(frame: .zero)
+        
         self.backgroundColor = .clear
         let tapGesture = UITapGestureRecognizer(target: self,
                                                 action: #selector(didTap))
@@ -53,6 +54,7 @@ class LikeView: UIView {
         }
         return nil
     }
+
     
     private func animateAccordingToState() {
         switch isSelected {

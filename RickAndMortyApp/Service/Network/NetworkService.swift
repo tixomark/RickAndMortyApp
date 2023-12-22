@@ -13,6 +13,7 @@ protocol NetworkServiceProtocol {
     func getCharacterBy(id: Int) async -> NetworkCharacter?
     func getPage<T: Codable>(pagePath path: String?) async -> Response<T>?
     func getImage(atPath path: String) async -> UIImage?
+    func getEpisodesPageByQuery<T: Codable>(_ query: String, queryType type: NetworkService.QueryType) async -> Response<T>?
 }
 
 final class NetworkService: ServiceProtocol {
@@ -23,7 +24,12 @@ final class NetworkService: ServiceProtocol {
         case locations = "https://rickandmortyapi.com/api/location"
         case episodes = "https://rickandmortyapi.com/api/episode"
     }
-
+    
+    enum QueryType: String {
+        case name
+        case episode
+    }
+    
     private func getUmSomething<SomeType: Codable>(using request: URLRequest) async -> SomeType? {
         var result: SomeType?
         do {
@@ -105,5 +111,20 @@ extension NetworkService: NetworkServiceProtocol {
             print(error.localizedDescription)
         }
         return result
+    }
+    
+    private func createEpisodesQueryPath(type: QueryType, query: String) -> String? {
+        let baseQueryPath = BaseURLs.episodes.rawValue + "/"
+        var urlComponents = URLComponents(string: baseQueryPath)!
+        let queryItem = URLQueryItem(name: type.rawValue,
+                                     value: query)
+        urlComponents.queryItems = [queryItem]
+        return urlComponents.url?.absoluteString
+    }
+    
+    func getEpisodesPageByQuery<T: Codable>(_ query: String, queryType type: NetworkService.QueryType) async -> Response<T>? {
+        let queryPath = createEpisodesQueryPath(type: type,
+                                                query: query)
+        return await getPage(pagePath: queryPath) as Response<T>?
     }
 }

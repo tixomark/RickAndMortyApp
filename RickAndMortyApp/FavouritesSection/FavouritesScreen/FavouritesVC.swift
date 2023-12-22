@@ -70,6 +70,7 @@ final class FavouritesVC: UIViewController {
                                                            style: .plain,
                                                            target: nil,
                                                            action: nil)
+        navigationItem.titleView = header
         
         self.view.backgroundColor = .RMbackgroundColor
         
@@ -77,17 +78,14 @@ final class FavouritesVC: UIViewController {
                                               height: 450)
         (collection.collectionViewLayout as? UICollectionViewFlowLayout)?.estimatedItemSize = estimatedCellSize
         
-        view.addSubviews(header, collection)
+        view.addSubviews(collection)
         
     }
     
     private func setConstraints() {
-        UIView.doNotTranslateAutoLayoutIntoConstraints(for: header, collection)
+        UIView.doNotTranslateAutoLayoutIntoConstraints(for: collection)
         NSLayoutConstraint.activate([
-            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            header.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            collection.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 29),
+            collection.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collection.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             collection.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collection.trailingAnchor.constraint(equalTo: view.trailingAnchor)

@@ -48,3 +48,13 @@ struct Episode {
     }
 }
 
+extension Episode: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Episode, rhs: Episode) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+

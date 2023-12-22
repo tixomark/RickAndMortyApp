@@ -16,6 +16,22 @@ extension UIColor {
                 blue: CGFloat(0xF7) / 255,
                 alpha: 1)
     }
+    
+    static var RMfilterTextColor: UIColor {
+        UIColor(red: CGFloat(0x21) / 255,
+                green: CGFloat(0x96) / 255,
+                blue: CGFloat(0xF3) / 255,
+                alpha: 1)
+    }
+    
+    static var RMfilterBackgroundColor: UIColor {
+        UIColor(red: CGFloat(0xE3) / 255,
+                green: CGFloat(0xF2) / 255,
+                blue: CGFloat(0xFD) / 255,
+                alpha: 1)
+    }
+    
+    
     static var RMbackgroundColor: UIColor {
         getColor("RMBackgroundColor")
     }

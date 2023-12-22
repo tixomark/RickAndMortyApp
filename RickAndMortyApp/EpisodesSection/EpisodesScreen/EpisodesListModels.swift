@@ -12,11 +12,12 @@ typealias FetchEpisodes = EpisodesList.FetchEpisodes
 typealias TapCharacter = EpisodesList.TapCharacter
 typealias TapLikeButton = EpisodesList.TapLikeButton
 typealias DeselectLikeButton = EpisodesList.DeselectLikeButton
+typealias QueryEpisodes = EpisodesList.QueryEpisodes
 
 enum EpisodesList {
     enum FetchEpisodes {
         struct Request {
-            var nextPage: Bool = false
+            var nextPage: Bool? = false
         }
         struct Response {
             var episodesFoundInStore: [Episode?]
@@ -29,6 +30,13 @@ enum EpisodesList {
         struct ViewModel {
             var episodes: [Episode]
             var lastPage: Bool
+        }
+    }
+    
+    enum QueryEpisodes {
+        struct Request {
+            var type: NetworkService.QueryType
+            var query: String
         }
     }
     

@@ -44,7 +44,6 @@ final class MainCoordinator: ParentCoordinator {
         
         episodesCoordinator.start()
         favouritesCoordinator.start()
-//        rootController.viewControllers?.forEach({ let _ = $0.view})
     }
     
     func childDidFinish(_ child: any ChildCoordinator) {
